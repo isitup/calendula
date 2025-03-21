@@ -659,9 +659,18 @@ class DateTimePicker {
     this.updateMonthTitle();
     this.renderCalendarDays();
     
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    
     // Update month in the input field
     const monthString = (month + 1).toString().padStart(2, '0');
-    this.overwriteDigitsInInput(3, monthString);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(3, monthString);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(3, monthString);
+    }
     
     // Call the callback if provided
     if (typeof this.config.onChange === 'function') {
@@ -678,9 +687,18 @@ class DateTimePicker {
     this.updateMonthTitle();
     this.renderCalendarDays();
     
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    
     // Update year in the input field
     const yearString = year.toString();
-    this.overwriteDigitsInInput(6, yearString);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(6, yearString);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(6, yearString);
+    }
     
     // Call the callback if provided
     if (typeof this.config.onChange === 'function') {
@@ -697,9 +715,18 @@ class DateTimePicker {
     this.updateMonthTitle();
     this.renderCalendarDays();
 
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+
     // Update month in the input field
     const month = (this.state.currentDate.getMonth() + 1).toString().padStart(2, '0');
-    this.overwriteDigitsInInput(3, month);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(3, month);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(3, month);
+    }
   }
   
   /**
@@ -900,9 +927,18 @@ class DateTimePicker {
     // Redraw calendar
     this.renderCalendarDays();
 
-    // Update day in the input field
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+
+    // Update day in the input field without focusing if on mobile
     const dayString = day.toString().padStart(2, '0');
-    this.overwriteDigitsInInput(0, dayString);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(0, dayString);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(0, dayString);
+    }
     
     // Hide calendar after date selection (only if time is not shown)
     if (!this.config.showTime) {
@@ -952,9 +988,18 @@ class DateTimePicker {
     // Redraw hours
     this.renderHours();
 
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+
     // Update hours in the input field
     const hourString = hour.toString().padStart(2, '0');
-    this.overwriteDigitsInInput(11, hourString);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(11, hourString);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(11, hourString);
+    }
 
     // Вызываем колбэк, если задан
     if (typeof this.config.onChange === 'function') {
@@ -1001,9 +1046,18 @@ class DateTimePicker {
     // Redraw tens of minutes
     this.renderTenMinutes();
 
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+
     // Update minutes in the input field
     const minuteString = (minute + this.state.selectedMinute).toString().padStart(2, '0');
-    this.overwriteDigitsInInput(14, minuteString);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(14, minuteString);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(14, minuteString);
+    }
 
     // Вызываем колбэк, если задан
     if (typeof this.config.onChange === 'function') {
@@ -1067,6 +1121,9 @@ class DateTimePicker {
    * @param {number} minute - Minutes (0-9 for step=1, 0-59 for other steps)
    */
   selectMinute(minute) {
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    
     if (this.config.minuteStep === 1) {
       // Standard mode - store tens and units separately
       this.state.selectedMinute = minute;
@@ -1079,7 +1136,13 @@ class DateTimePicker {
 
       // Обновляем минуты в поле ввода
       const minuteString = (this.state.selectedTenMinute + minute).toString().padStart(2, '0');
-      this.overwriteDigitsInInput(14, minuteString);
+      if (isMobile) {
+        // For mobile, update value without changing focus
+        this.overwriteDigitsInInputWithoutFocus(14, minuteString);
+      } else {
+        // For desktop, use normal behavior with focus
+        this.overwriteDigitsInInput(14, minuteString);
+      }
     } else {
       // Step mode - set minutes directly
       this.state.selectedDate.setMinutes(minute);
@@ -1093,7 +1156,13 @@ class DateTimePicker {
 
       // Обновляем минуты в поле ввода
       const minuteString = minute.toString().padStart(2, '0');
-      this.overwriteDigitsInInput(14, minuteString);
+      if (isMobile) {
+        // For mobile, update value without changing focus
+        this.overwriteDigitsInInputWithoutFocus(14, minuteString);
+      } else {
+        // For desktop, use normal behavior with focus
+        this.overwriteDigitsInInput(14, minuteString);
+      }
     }
 
     // Call the callback if provided
@@ -1139,9 +1208,18 @@ class DateTimePicker {
     // Redraw seconds
     this.renderSeconds();
 
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+
     // Update seconds in the input field
     const secondString = second.toString().padStart(2, '0');
-    this.overwriteDigitsInInput(17, secondString);
+    if (isMobile) {
+      // For mobile, update value without changing focus
+      this.overwriteDigitsInInputWithoutFocus(17, secondString);
+    } else {
+      // For desktop, use normal behavior with focus
+      this.overwriteDigitsInInput(17, secondString);
+    }
 
     // Call the callback if provided
     if (typeof this.config.onChange === 'function') {
@@ -1199,6 +1277,56 @@ class DateTimePicker {
                         currentValue[startPosition + 1] === ' ' ? 1 : 0);
     input.selectionStart = newPosition;
     input.selectionEnd = newPosition;
+    this.state.cursorPosition = newPosition;
+  }
+
+  /**
+   * Replaces digits in the input field without setting focus
+   * @param {number} startPosition - Start position
+   * @param {string} newValue - New value
+   */
+  overwriteDigitsInInputWithoutFocus(startPosition, newValue) {
+    const input = this.elements.dateInput;
+    const currentValue = input.value;
+
+    // If field is empty, update with full date value
+    if (!currentValue) {
+      this.updateDateInput();
+      return;
+    }
+
+    let newInputValue = '';
+    let valueIndex = 0;
+
+    // Build a new string, replacing only digits at specified positions
+    for (let i = 0; i < currentValue.length; i++) {
+      if (i >= startPosition && valueIndex < newValue.length) {
+        // If we're at a digit position to replace
+        if (/\d/.test(currentValue[i])) {
+          // Replace the digit
+          newInputValue += newValue[valueIndex];
+          valueIndex++;
+        } else {
+          // Preserve non-digit characters (dots, colons, spaces)
+          newInputValue += currentValue[i];
+        }
+      } else {
+        // Preserve characters outside the replacement range
+        newInputValue += currentValue[i];
+      }
+    }
+
+    // Update input field value
+    input.value = newInputValue;
+
+    // Update calendar based on new value
+    this.handleInputChange(false);
+    
+    // Update cursor position in state but don't focus the input
+    const newPosition = startPosition + newValue.length +
+                      (currentValue[startPosition + 1] === '.' ||
+                      currentValue[startPosition + 1] === ':' ||
+                      currentValue[startPosition + 1] === ' ' ? 1 : 0);
     this.state.cursorPosition = newPosition;
   }
 
