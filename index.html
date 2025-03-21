@@ -29,8 +29,8 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Create date picker
       const picker = new DateTimePicker('#calendarContainer', {
-        showSeconds: true,
-        minuteStep: 1,
+        showSeconds: false,
+        minuteStep: 5,
         initialDate: new Date(),
         onChange: function(selectedDate) {
           console.log('Selected date changed:', selectedDate);

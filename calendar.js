@@ -36,6 +36,17 @@ class DateTimePicker {
       selectedSecond: this.config.initialDate.getSeconds(),
       cursorPosition: 0
     };
+    
+    // Initialize month names and abbreviations
+    this.monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    this.monthAbbreviations = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
 
     // Initialize component
     this.init();
@@ -418,12 +429,8 @@ class DateTimePicker {
    * Updates the month and year titles
    */
   updateMonthTitle() {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-
-    this.elements.monthTitle.textContent = months[this.state.currentDate.getMonth()];
+    // Use full month name in the title
+    this.elements.monthTitle.textContent = this.monthNames[this.state.currentDate.getMonth()];
     this.elements.yearTitle.textContent = this.state.currentDate.getFullYear();
   }
   
@@ -434,22 +441,20 @@ class DateTimePicker {
     // Hide year selector if it's open
     this.elements.yearSelector.style.display = 'none';
     
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    
     // Create month grid (4x3)
     this.elements.monthSelector.innerHTML = '';
     this.elements.monthSelector.style.display = 'grid';
     this.elements.monthSelector.style.gridTemplateColumns = 'repeat(4, 1fr)';
     this.elements.monthSelector.style.gridTemplateRows = 'repeat(3, 1fr)';
     
-    // Add month buttons
-    months.forEach((month, index) => {
+    // Add month buttons using abbreviated names
+    this.monthAbbreviations.forEach((monthAbbr, index) => {
       const monthElement = document.createElement('div');
       monthElement.className = 'month-item';
-      monthElement.textContent = month;
+      monthElement.textContent = monthAbbr;
+      
+      // Store full month name for accessibility
+      monthElement.title = this.monthNames[index];
       
       // Highlight the current month
       if (index === this.state.currentDate.getMonth()) {

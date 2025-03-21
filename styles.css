@@ -120,12 +120,13 @@ body {
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  padding: 8px;
+  padding: 10px;
   z-index: 10;
   width: 280px;
   margin-top: 5px;
   left: 50%;
   transform: translateX(-50%);
+  gap: 4px;
 }
 
 .month-item, .year-item {
@@ -133,6 +134,13 @@ body {
   text-align: center;
   cursor: pointer;
   border-radius: 4px;
+  margin: 2px;
+  font-size: 14px;
+}
+
+.month-item {
+  padding: 10px 0;
+  font-weight: 500;
 }
 
 .month-item:hover, .year-item:hover {
