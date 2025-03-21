@@ -1,5 +1,5 @@
 # Calendula
 
-Das calendar
+Date and time picker calendar
 
 ![](calendula.jpg)
