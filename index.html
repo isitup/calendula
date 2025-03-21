@@ -326,12 +326,47 @@
             this.state.cursorPosition = e.target.selectionStart;
           });
           
+          // Handle paste event
+          this.elements.dateInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            
+            // Get clipboard data
+            const clipboardData = e.clipboardData || window.clipboardData;
+            const pastedText = clipboardData.getData('text');
+            
+            // Extract only digits from pasted text
+            const digits = pastedText.replace(/\D/g, '');
+            
+            // Get the current cursor position directly from the element
+            const currentPosition = e.target.selectionStart;
+            
+            // Update our stored position
+            this.state.cursorPosition = currentPosition;
+            
+            if (digits.length > 0) {
+              // Apply overwrite logic with multiple digits
+              this.overwriteMultipleDigits(currentPosition, digits);
+            }
+          });
+          
           // Handle key presses for digit overwriting and cursor movement
           this.elements.dateInput.addEventListener('keydown', (e) => {
             // Only handle printable characters and specific control keys
             // Check if the key is a printable character (single character key) or Delete/Backspace
             const isPrintableChar = e.key.length === 1;
             const isDeleteOrBackspace = e.key === 'Delete' || e.key === 'Backspace';
+            
+            // Navigation keys that should update cursor position
+            const isNavigationKey = ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
+            
+            // If it's a navigation key, update the cursor position after browser handles it
+            if (isNavigationKey) {
+              // Use setTimeout to let the browser update the cursor position first
+              setTimeout(() => {
+                this.state.cursorPosition = this.elements.dateInput.selectionStart;
+              }, 0);
+              return;
+            }
             
             // If it's not a printable character or Delete/Backspace, ignore it
             if (!isPrintableChar && !isDeleteOrBackspace) {
@@ -476,13 +511,25 @@
             }
           });
           
-          // When the input field receives focus, position cursor at beginning if not specifically positioned
+          // When the input field receives focus, update cursor position
           this.elements.dateInput.addEventListener('focus', (e) => {
-            if (this.state.cursorPosition === undefined || this.state.cursorPosition === null) {
+            // Update the cursor position to the current selection
+            this.state.cursorPosition = e.target.selectionStart;
+            
+            // If there's no specific position (undefined, null, or 0), set it to beginning
+            if (!this.state.cursorPosition) {
               e.target.selectionStart = 0;
               e.target.selectionEnd = 0;
               this.state.cursorPosition = 0;
             }
+          });
+          
+          // Add a mouseup handler to catch cursor position changes from mouse clicks
+          this.elements.dateInput.addEventListener('mouseup', (e) => {
+            // Update cursor position after mouse selection is complete
+            setTimeout(() => {
+              this.state.cursorPosition = e.target.selectionStart;
+            }, 0);
           });
         },
         
@@ -776,6 +823,69 @@
                              (currentValue[startPosition + 1] === '.' || 
                               currentValue[startPosition + 1] === ':' || 
                               currentValue[startPosition + 1] === ' ' ? 1 : 0);
+          input.selectionStart = newPosition;
+          input.selectionEnd = newPosition;
+          this.state.cursorPosition = newPosition;
+        },
+        
+        // Method to handle pasting multiple digits
+        overwriteMultipleDigits: function(startPosition, digits) {
+          const input = this.elements.dateInput;
+          const currentValue = input.value;
+          
+          // If input is empty, update with full date and we'll overwrite it
+          if (!currentValue) {
+            this.updateDateInput();
+            return;
+          }
+          
+          let newInputValue = currentValue;
+          let currentPos = startPosition;
+          let digitsReplaced = 0;
+          
+          // For each digit in the pasted content
+          for (let i = 0; i < digits.length; i++) {
+            // Find the next digit position in the input from our current position
+            while (currentPos < newInputValue.length && !/\d/.test(newInputValue[currentPos])) {
+              currentPos++;
+            }
+            
+            // If we've reached the end of the input, stop
+            if (currentPos >= newInputValue.length) {
+              break;
+            }
+            
+            // Replace the digit at current position
+            newInputValue = 
+              newInputValue.substring(0, currentPos) + 
+              digits[i] + 
+              newInputValue.substring(currentPos + 1);
+              
+            digitsReplaced++;
+            currentPos++;
+          }
+          
+          // Update input value
+          input.value = newInputValue;
+          
+          // Update the calendar
+          this.handleInputChange(false);
+          
+          // Position cursor after the last replaced digit
+          input.focus();
+          
+          // Find a good cursor position after the pasted content
+          let newPosition = startPosition;
+          let digitsFound = 0;
+          
+          // Move through the string, counting digits until we've found all that we replaced
+          while (newPosition < newInputValue.length && digitsFound < digitsReplaced) {
+            if (/\d/.test(newInputValue[newPosition])) {
+              digitsFound++;
+            }
+            newPosition++;
+          }
+          
           input.selectionStart = newPosition;
           input.selectionEnd = newPosition;
           this.state.cursorPosition = newPosition;
