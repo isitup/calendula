@@ -328,13 +328,18 @@
           
           // Handle key presses for digit overwriting and cursor movement
           this.elements.dateInput.addEventListener('keydown', (e) => {
-            // Ignore control keys like Shift, Alt, etc.
-            if (e.ctrlKey || e.altKey || e.metaKey) {
+            // Only handle printable characters and specific control keys
+            // Check if the key is a printable character (single character key) or Delete/Backspace
+            const isPrintableChar = e.key.length === 1;
+            const isDeleteOrBackspace = e.key === 'Delete' || e.key === 'Backspace';
+            
+            // If it's not a printable character or Delete/Backspace, ignore it
+            if (!isPrintableChar && !isDeleteOrBackspace) {
               return;
             }
             
-            // Ignore navigation keys
-            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Tab'].includes(e.key)) {
+            // If Ctrl, Alt or Meta is pressed with a character, it's likely a shortcut - ignore it
+            if (e.ctrlKey || e.altKey || e.metaKey) {
               return;
             }
             
