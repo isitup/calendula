@@ -9,6 +9,10 @@
 <body>
   <div class="config-panel">
     <div class="config-item">
+      <label for="showTimeCheckbox">Show Time:</label>
+      <input type="checkbox" id="showTimeCheckbox" checked>
+    </div>
+    <div class="config-item">
       <label for="minuteStepSelect">Minute Step:</label>
       <select id="minuteStepSelect">
         <option value="1">1 minute</option>
@@ -29,6 +33,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Create date picker
       const picker = new DateTimePicker('#calendarContainer', {
+        showTime: true,
         showSeconds: false,
         minuteStep: 5,
         initialDate: new Date(),
@@ -38,14 +43,22 @@
       });
       
       // Setup config controls
+      const showTimeCheckbox = document.getElementById('showTimeCheckbox');
       const minuteStepSelect = document.getElementById('minuteStepSelect');
       const showSecondsCheckbox = document.getElementById('showSecondsCheckbox');
-      
+
       // Set initial values
+      showTimeCheckbox.checked = picker.config.showTime;
       minuteStepSelect.value = picker.config.minuteStep.toString();
       showSecondsCheckbox.checked = picker.config.showSeconds;
-      
+
       // Add event listeners
+      showTimeCheckbox.addEventListener('change', (e) => {
+        picker.setConfig({
+          showTime: e.target.checked
+        });
+      });
+
       minuteStepSelect.addEventListener('change', (e) => {
         picker.setConfig({
           minuteStep: parseInt(e.target.value)

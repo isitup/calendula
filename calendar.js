@@ -19,6 +19,7 @@ class DateTimePicker {
 
     // Default settings
     this.config = {
+      showTime: options.showTime !== undefined ? options.showTime : false,
       showSeconds: options.showSeconds !== undefined ? options.showSeconds : true,
       minuteStep: options.minuteStep || 1,
       initialDate: options.initialDate || new Date(),
@@ -206,6 +207,12 @@ class DateTimePicker {
    * Applies settings to the interface
    */
   applyConfig() {
+    // Manage time container visibility
+    const timeContainer = this.datePickerElement.querySelector('.time-container');
+    if (timeContainer) {
+      timeContainer.style.display = this.config.showTime ? 'block' : 'none';
+    }
+
     // Manage seconds visibility
     const secondsSection = this.datePickerElement.querySelector('.time-section:last-child');
     if (secondsSection) {
@@ -1080,21 +1087,27 @@ class DateTimePicker {
    * Updates the input field value based on the selected date
    */
   updateDateInput() {
-    // Форматируем базовые компоненты даты и времени
+    // Formatting Basic Date and Time Components
     const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
     const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
     const year = this.state.selectedDate.getFullYear();
     const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
     const minutes = this.state.selectedDate.getMinutes().toString().padStart(2, '0');
 
-    // Форматируем с секундами или без в зависимости от настроек
-    if (this.config.showSeconds) {
-      // Формат с секундами (DD.MM.YYYY HH:MM:SS)
-      const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
-      this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+    // Format with or without time depending on the settings
+    if (this.config.showTime) {
+      // Format with or without seconds depending on the settings
+      if (this.config.showSeconds) {
+        // Format with seconds (DD.MM.YYYY HH:MM:SS)
+        const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
+        this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+      } else {
+        // Format without seconds (DD.MM.YYYY HH:MM)
+        this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}`;
+      }
     } else {
-      // Формат без секунд (DD.MM.YYYY HH:MM)
-      this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}`;
+      // Format without seconds (DD.MM.YYYY HH:MM)
+      this.elements.dateInput.value = `${day}.${month}.${year}`;
     }
   }
 
@@ -1110,12 +1123,17 @@ class DateTimePicker {
     // Шаблоны для форматов с секундами и без
     const regexWithSeconds = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
     const regexWithoutSeconds = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/;
+    const regexWithoutTime = /^(\d{2})\.(\d{2})\.(\d{4})$/;
 
     // Пытаемся сопоставить с подходящим форматом в зависимости от настроек
     let match;
     let seconds = 0;
 
-    if (this.config.showSeconds) {
+    if (!this.config.showTime) {
+      match = inputValue.match(regexWithoutTime);
+      seconds = 0;
+    }
+    else if (this.config.showSeconds) {
       match = inputValue.match(regexWithSeconds);
       if (match) {
         const [_, day, month, year, hours, minutes, secs] = match;
@@ -1126,7 +1144,11 @@ class DateTimePicker {
     }
 
     if (match) {
-      const [_, day, month, year, hours, minutes] = match;
+      let [_, day, month, year, hours, minutes] = match;
+      if (!this.config.showTime) {
+        hours = "0";
+        minutes = "0";
+      }
 
       // Создаем новую дату из введенного значения
       const newDate = new Date(
@@ -1154,8 +1176,8 @@ class DateTimePicker {
         this.renderTenMinutes();
         this.renderMinutes();
 
-        // Отрисовываем секунды только если они отображаются
-        if (this.config.showSeconds) {
+        // Draw seconds only if they are displayed
+        if (this.config.showTime && this.config.showSeconds) {
           this.renderSeconds();
         }
 
@@ -1216,7 +1238,7 @@ class DateTimePicker {
     this.renderTenMinutes();
     this.renderMinutes();
 
-    if (this.config.showSeconds) {
+    if (this.config.showTime && this.config.showSeconds) {
       this.renderSeconds();
     }
 
@@ -1233,6 +1255,10 @@ class DateTimePicker {
    * @param {Object} config - New configuration parameters
    */
   setConfig(config) {
+    if (config.showTime !== undefined) {
+      this.config.showTime = config.showTime;
+    }
+
     if (config.showSeconds !== undefined) {
       this.config.showSeconds = config.showSeconds;
     }
