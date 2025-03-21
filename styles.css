@@ -16,10 +16,13 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  margin: 0 auto;
+  margin: 0;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  position: absolute;
+  z-index: 1000;
+  display: none; /* Hidden by default */
 }
 
 .calendar-container {
@@ -50,8 +53,9 @@ body {
 }
 
 .input-container {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
+  position: relative;
+  padding: 0;
+  margin-bottom: 12px;
 }
 
 .date-input {
@@ -60,11 +64,31 @@ body {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+  cursor: pointer;
+}
+
+.date-input:hover {
+  border-color: #aaa;
+}
+
+.date-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.date-picker-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+  z-index: 100; /* Ensure the dropdown appears above other content */
 }
 
 @media (max-width: 540px) {
   .input-container {
-    padding: 10px;
+    padding: 0;
+    margin-bottom: 8px;
   }
   
   .date-input {

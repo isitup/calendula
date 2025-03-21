@@ -172,15 +172,47 @@ class DateTimePicker {
     dateTimePicker.appendChild(calendarContainer);
     dateTimePicker.appendChild(timeContainer);
 
-    // If using external input field, don't add inputContainer
+    // Create a wrapper div to hold both the input and the dropdown
+    const pickerWrapper = document.createElement('div');
+    pickerWrapper.className = 'date-picker-wrapper';
+    
+    // If using external input field, reference it, otherwise append our input
     if (!this.config.inputField) {
-      this.container.appendChild(inputContainer);
+      pickerWrapper.appendChild(inputContainer);
+    } else {
+      // If external input field is provided, we need to position our dropdown near it
+      const inputParent = this.config.inputField.parentNode;
+      
+      // Insert wrapper after the input field
+      if (inputParent) {
+        // Add a small wrapper div around the external input to maintain relative positioning
+        const inputWrapper = document.createElement('div');
+        inputWrapper.className = 'date-input-wrapper';
+        inputWrapper.style.position = 'relative';
+        
+        // Replace the input with the wrapper containing the input
+        inputParent.insertBefore(inputWrapper, this.config.inputField);
+        inputWrapper.appendChild(this.config.inputField);
+        
+        // Append the picker wrapper after the input wrapper
+        inputWrapper.appendChild(pickerWrapper);
+      }
     }
-
-    this.container.appendChild(dateTimePicker);
-
+    
+    // Append the date picker to the wrapper
+    pickerWrapper.appendChild(dateTimePicker);
+    
+    // Add the wrapper to the container if we're not using an external input
+    if (!this.config.inputField) {
+      this.container.appendChild(pickerWrapper);
+    }
+    
+    // Always ensure the date picker is initially hidden
+    dateTimePicker.style.display = 'none';
+    
     // Save references to created elements
     this.datePickerElement = dateTimePicker;
+    this.pickerWrapper = pickerWrapper;
   }
 
   /**
@@ -277,16 +309,40 @@ class DateTimePicker {
    */
   bindEvents() {
     // Calendar navigation
-    this.elements.prevMonthBtn.addEventListener('click', () => this.changeMonth(-1));
-    this.elements.nextMonthBtn.addEventListener('click', () => this.changeMonth(1));
+    this.elements.prevMonthBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent event from reaching document
+      this.changeMonth(-1);
+    });
+    this.elements.nextMonthBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent event from reaching document
+      this.changeMonth(1);
+    });
     
     // Month and year selection dialogs
-    this.elements.monthTitle.addEventListener('click', () => this.showMonthSelector());
-    this.elements.yearTitle.addEventListener('click', () => this.showYearSelector());
+    this.elements.monthTitle.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent event from reaching document
+      this.showMonthSelector();
+    });
+    this.elements.yearTitle.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent event from reaching document
+      this.showYearSelector();
+    });
 
-    // Track cursor position in input field
+    // Show calendar when clicking on input field
     this.elements.dateInput.addEventListener('click', (e) => {
       this.state.cursorPosition = e.target.selectionStart;
+      setTimeout(() => this.showDatePicker(), 0); // Delay to ensure the DOM is ready
+      e.stopPropagation(); // Prevent immediate hiding
+    });
+    
+    // Show calendar when focusing on input field
+    this.elements.dateInput.addEventListener('focus', (e) => {
+      if (!this.state.cursorPosition) {
+        e.target.selectionStart = 0;
+        e.target.selectionEnd = 0;
+        this.state.cursorPosition = 0;
+      }
+      setTimeout(() => this.showDatePicker(), 0); // Delay to ensure the DOM is ready
     });
 
     // Handle key presses for digit overwrite
@@ -300,6 +356,12 @@ class DateTimePicker {
       // Apply changes on Enter
       if (e.key === 'Enter') {
         this.handleInputChange();
+        this.hideDatePicker();
+      }
+      
+      // Hide on Escape
+      if (e.key === 'Escape') {
+        this.hideDatePicker();
       }
     });
 
@@ -308,15 +370,7 @@ class DateTimePicker {
       setTimeout(() => {
         this.state.cursorPosition = e.target.selectionStart;
       }, 0);
-    });
-
-    // Handle focus on input field
-    this.elements.dateInput.addEventListener('focus', (e) => {
-      if (!this.state.cursorPosition) {
-        e.target.selectionStart = 0;
-        e.target.selectionEnd = 0;
-        this.state.cursorPosition = 0;
-      }
+      e.stopPropagation(); // Prevent immediate hiding
     });
     
     // Handle paste event
@@ -334,6 +388,23 @@ class DateTimePicker {
       if (onlyDigits.length > 0) {
         // Handle digit replacement at cursor position
         this.overwriteDigitsAtCursor(onlyDigits);
+      }
+    });
+    
+    // Hide datepicker when clicking outside
+    document.addEventListener('click', () => {
+      this.hideDatePicker();
+    });
+    
+    // Prevent hiding when clicking inside the date picker
+    this.datePickerElement.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent click from reaching document
+    });
+    
+    // Update calendar layout on window resize
+    window.addEventListener('resize', () => {
+      if (this.isDatePickerVisible()) {
+        this.updateDatePickerPosition();
       }
     });
   }
@@ -630,6 +701,117 @@ class DateTimePicker {
     const month = (this.state.currentDate.getMonth() + 1).toString().padStart(2, '0');
     this.overwriteDigitsInInput(3, month);
   }
+  
+  /**
+   * Shows the date picker dropdown
+   */
+  showDatePicker() {
+    if (this.isDatePickerVisible()) return;
+    
+    // Make sure the date picker is visible
+    this.datePickerElement.style.display = 'flex';
+    
+    // For Safari: force a reflow to ensure proper dimensions before calculating position
+    void this.datePickerElement.offsetHeight;
+    
+    // Calculate and set position
+    this.updateDatePickerPosition();
+    
+    // Trigger a callback if defined
+    if (typeof this.config.onOpen === 'function') {
+      this.config.onOpen();
+    }
+  }
+  
+  /**
+   * Hides the date picker dropdown
+   */
+  hideDatePicker() {
+    if (!this.isDatePickerVisible()) return;
+    
+    // Hide date picker
+    this.datePickerElement.style.display = 'none';
+    
+    // Also hide selectors
+    if (this.elements.monthSelector) {
+      this.elements.monthSelector.style.display = 'none';
+    }
+    if (this.elements.yearSelector) {
+      this.elements.yearSelector.style.display = 'none';
+    }
+    
+    // Trigger a callback if defined
+    if (typeof this.config.onClose === 'function') {
+      this.config.onClose();
+    }
+  }
+  
+  /**
+   * Checks if date picker is currently visible
+   * @returns {boolean} True if visible
+   */
+  isDatePickerVisible() {
+    return this.datePickerElement && 
+           this.datePickerElement.style.display !== 'none';
+  }
+  
+  /**
+   * Updates date picker position based on input field
+   */
+  updateDatePickerPosition() {
+    const inputField = this.elements.dateInput;
+    if (!inputField) return;
+    
+    // Get the input's dimensions and position
+    const inputRect = inputField.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    
+    // Make sure the date picker is visible before measuring it
+    const wasHidden = this.datePickerElement.style.display === 'none';
+    if (wasHidden) {
+      // Temporarily make it visible but invisible to measure it
+      this.datePickerElement.style.visibility = 'hidden';
+      this.datePickerElement.style.display = 'flex';
+    }
+    
+    // Get the date picker's dimensions
+    const pickerHeight = this.datePickerElement.offsetHeight;
+    const pickerWidth = this.datePickerElement.offsetWidth;
+    
+    // Calculate space below and above the input
+    const spaceBelow = windowHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+    
+    // Reset visibility if it was hidden
+    if (wasHidden) {
+      this.datePickerElement.style.visibility = '';
+      if (!this.isDatePickerVisible()) {
+        this.datePickerElement.style.display = 'none';
+      }
+    }
+    
+    // Position vertically
+    if (spaceBelow >= pickerHeight || spaceBelow > spaceAbove) {
+      // Position below input
+      this.datePickerElement.style.top = `${inputRect.height}px`;
+      this.datePickerElement.style.bottom = 'auto';
+    } else {
+      // Position above input
+      this.datePickerElement.style.bottom = `${inputRect.height + inputRect.height}px`;
+      this.datePickerElement.style.top = 'auto';
+    }
+    
+    // Center horizontally if there is enough space
+    this.datePickerElement.style.left = '0px';
+    this.datePickerElement.style.right = 'auto';
+    
+    // Add a small delay to make sure the picker is fully rendered and positioned
+    setTimeout(() => {
+      // This triggers a reflow and ensures the picker is fully rendered
+      void this.datePickerElement.offsetHeight;
+    }, 0);
+  }
 
   /**
    * Renders calendar days
@@ -721,8 +903,13 @@ class DateTimePicker {
     // Update day in the input field
     const dayString = day.toString().padStart(2, '0');
     this.overwriteDigitsInInput(0, dayString);
+    
+    // Hide calendar after date selection (only if time is not shown)
+    if (!this.config.showTime) {
+      this.hideDatePicker();
+    }
 
-    // Вызываем колбэк, если задан
+    // Call the callback if provided
     if (typeof this.config.onChange === 'function') {
       this.config.onChange(this.state.selectedDate);
     }
