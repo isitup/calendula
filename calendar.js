@@ -285,8 +285,12 @@ class DateTimePicker {
     // Handle key presses for digit overwrite
     this.elements.dateInput.addEventListener('keydown', this.handleKeyDown.bind(this));
 
-    // Handle Enter to apply changes
+    // Handle keyup events for cursor tracking and Enter key
     this.elements.dateInput.addEventListener('keyup', (e) => {
+      // Update cursor position on any key
+      this.state.cursorPosition = e.target.selectionStart;
+      
+      // Apply changes on Enter
       if (e.key === 'Enter') {
         this.handleInputChange();
       }
@@ -307,6 +311,24 @@ class DateTimePicker {
         this.state.cursorPosition = 0;
       }
     });
+    
+    // Handle paste event
+    this.elements.dateInput.addEventListener('paste', (e) => {
+      // Prevent default paste behavior
+      e.preventDefault();
+      
+      // Get pasted content
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const pastedText = clipboardData.getData('text');
+      
+      // Filter out non-digits
+      const onlyDigits = pastedText.replace(/\D/g, '');
+      
+      if (onlyDigits.length > 0) {
+        // Handle digit replacement at cursor position
+        this.overwriteDigitsAtCursor(onlyDigits);
+      }
+    });
   }
 
   /**
@@ -316,13 +338,22 @@ class DateTimePicker {
     // Process only printable characters and Backspace/Delete
     const isPrintableChar = e.key.length === 1;
     const isDeleteOrBackspace = e.key === 'Delete' || e.key === 'Backspace';
+    
+    // List of navigation keys we want to allow default behavior for
+    const isNavigationKey = ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
+    
+    // Allow default behavior for navigation keys
+    if (isNavigationKey) {
+      // We'll update cursor position in the keyup handler
+      return;
+    }
 
     // Ignore non-printable characters except Backspace/Delete
     if (!isPrintableChar && !isDeleteOrBackspace) {
       return;
     }
 
-    // Ignore combinations with modifiers
+    // Allow combinations with modifiers like Ctrl+Home, Ctrl+A, etc.
     if (e.ctrlKey || e.altKey || e.metaKey) {
       return;
     }
@@ -330,7 +361,9 @@ class DateTimePicker {
     e.preventDefault(); // Cancel default behavior
 
     const input = this.elements.dateInput;
+    // Always get the current cursor position directly from the input element
     const cursorPos = input.selectionStart;
+    // Update our internal state to match
     this.state.cursorPosition = cursorPos;
     const currentValue = input.value;
 
@@ -976,37 +1009,43 @@ class DateTimePicker {
   }
 
   /**
-   * Replaces multiple digits in the input field (for pasting)
-   * @param {number} startPosition - Initial cursor position
+   * Overwrites digits at cursor position with pasted digits
    * @param {string} digits - String of digits to paste
    */
-  overwriteMultipleDigits(startPosition, digits) {
+  overwriteDigitsAtCursor(digits) {
     const input = this.elements.dateInput;
     const currentValue = input.value;
+    
+    // Always get the current cursor position from the input element
+    // This ensures we have the most up-to-date position even after navigation keys
+    const cursorPos = input.selectionStart;
+    
+    // Update our internal state to match
+    this.state.cursorPosition = cursorPos;
 
-    // Если поле пустое, обновляем полным значением даты
+    // If the field is empty, update with full date value
     if (!currentValue) {
       this.updateDateInput();
       return;
     }
 
     let newInputValue = currentValue;
-    let currentPos = startPosition;
+    let currentPos = cursorPos;
     let digitsReplaced = 0;
 
-    // Для каждой цифры во вставляемом содержимом
+    // For each digit in the pasted content
     for (let i = 0; i < digits.length; i++) {
-      // Находим следующую позицию цифры в поле ввода от текущей позиции
+      // Find next digit position in the input field from current position
       while (currentPos < newInputValue.length && !/\d/.test(newInputValue[currentPos])) {
         currentPos++;
       }
 
-      // Если достигнут конец поля ввода, останавливаемся
+      // If end of input field is reached, stop
       if (currentPos >= newInputValue.length) {
         break;
       }
 
-      // Заменяем цифру на текущей позиции
+      // Replace digit at current position
       newInputValue =
         newInputValue.substring(0, currentPos) +
         digits[i] +
@@ -1016,30 +1055,25 @@ class DateTimePicker {
       currentPos++;
     }
 
-    // Обновляем значение поля ввода
+    // Update input field value
     input.value = newInputValue;
 
-    // Обновляем календарь
+    // Update calendar
     this.handleInputChange(false);
 
-    // Устанавливаем курсор после последней замененной цифры
+    // Set cursor after last replaced digit
     input.focus();
-
-    // Находим хорошую позицию курсора после вставленного содержимого
-    let newPosition = startPosition;
-    let digitsFound = 0;
-
-    // Перемещаемся по строке, подсчитывая цифры, пока не найдем все, что мы заменили
-    while (newPosition < newInputValue.length && digitsFound < digitsReplaced) {
-      if (/\d/.test(newInputValue[newPosition])) {
-        digitsFound++;
-      }
-      newPosition++;
-    }
-
-    input.selectionStart = newPosition;
-    input.selectionEnd = newPosition;
-    this.state.cursorPosition = newPosition;
+    input.selectionStart = currentPos;
+    input.selectionEnd = currentPos;
+    this.state.cursorPosition = currentPos;
+  }
+  
+  /**
+   * Legacy method for backward compatibility
+   * @deprecated Use overwriteDigitsAtCursor instead
+   */
+  overwriteMultipleDigits(startPosition, digits) {
+    this.overwriteDigitsAtCursor(digits);
   }
 
   /**
