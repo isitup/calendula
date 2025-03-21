@@ -297,6 +297,11 @@
           secondsGrid: document.getElementById('secondsGrid')
         },
         
+        // Configuration options
+        config: {
+          showSeconds: false  // Set to false to hide the seconds section
+        },
+        
         state: {
           currentDate: new Date(),
           selectedDate: new Date(),
@@ -308,13 +313,31 @@
         },
         
         init: function() {
+          // Apply configuration
+          this.applyConfig();
+          
+          // Render all components
           this.renderCalendarDays();
           this.renderHours();
           this.renderTenMinutes();
           this.renderMinutes();
-          this.renderSeconds();
+          
+          // Only render seconds if configured to show
+          if (this.config.showSeconds) {
+            this.renderSeconds();
+          }
+          
           this.updateDateInput();
           this.bindEvents();
+        },
+        
+        // Apply configuration settings to the UI
+        applyConfig: function() {
+          // Handle seconds visibility
+          const secondsSection = document.querySelector('.time-section:last-child');
+          if (secondsSection) {
+            secondsSection.style.display = this.config.showSeconds ? 'block' : 'none';
+          }
         },
         
         bindEvents: function() {
@@ -892,27 +915,48 @@
         },
         
         updateDateInput: function() {
-          // Format the date for the input field (DD.MM.YYYY HH:MM:SS)
+          // Format basic date and time
           const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
           const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
           const year = this.state.selectedDate.getFullYear();
           const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
           const minutes = (this.state.selectedTenMinute + this.state.selectedMinute).toString().padStart(2, '0');
-          const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
           
-          this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+          // Format with or without seconds based on configuration
+          if (this.config.showSeconds) {
+            // Format with seconds (DD.MM.YYYY HH:MM:SS)
+            const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
+            this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+          } else {
+            // Format without seconds (DD.MM.YYYY HH:MM)
+            this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}`;
+          }
         },
         
         handleInputChange: function(updateInput = true) {
           // Get the value from the input field
           const inputValue = this.elements.dateInput.value;
           
-          // Checking the format (DD.MM.YYYY HH:MM:SS)
-          const regex = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
-          const match = inputValue.match(regex);
+          // Regex patterns for both with and without seconds
+          const regexWithSeconds = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
+          const regexWithoutSeconds = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/;
+          
+          // Try to match with the appropriate format based on config
+          let match;
+          let seconds = 0;
+          
+          if (this.config.showSeconds) {
+            match = inputValue.match(regexWithSeconds);
+            if (match) {
+              const [_, day, month, year, hours, minutes, secs] = match;
+              seconds = parseInt(secs);
+            }
+          } else {
+            match = inputValue.match(regexWithoutSeconds);
+          }
           
           if (match) {
-            const [_, day, month, year, hours, minutes, seconds] = match;
+            const [_, day, month, year, hours, minutes] = match;
             
             // Create a new date from the entered value
             const newDate = new Date(
@@ -921,7 +965,7 @@
               parseInt(day),
               parseInt(hours),
               parseInt(minutes),
-              parseInt(seconds)
+              seconds
             );
             
             // Check that the date is valid
@@ -939,7 +983,11 @@
               this.renderHours();
               this.renderTenMinutes();
               this.renderMinutes();
-              this.renderSeconds();
+              
+              // Only render seconds if configured to show
+              if (this.config.showSeconds) {
+                this.renderSeconds();
+              }
               
               // Only update the input field if requested (to avoid infinite loops)
               if (updateInput) {
