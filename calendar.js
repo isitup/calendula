@@ -101,9 +101,14 @@ class DateTimePicker {
     calendarHeader.innerHTML = `
       <div class="month-nav">
         <button id="prevMonth">&lt;</button>
-        <div class="month-title" id="monthTitle"></div>
+        <div class="month-year-selector">
+          <span class="month-title" id="monthTitle"></span>
+          <span class="year-title" id="yearTitle"></span>
+        </div>
         <button id="nextMonth">&gt;</button>
       </div>
+      <div class="month-selector" id="monthSelector" style="display: none;"></div>
+      <div class="year-selector" id="yearSelector" style="display: none;"></div>
     `;
 
     // Grid for calendar days
@@ -173,9 +178,12 @@ class DateTimePicker {
     this.elements = {
       dateInput: this.dateInput,
       monthTitle: this.container.querySelector('#monthTitle'),
+      yearTitle: this.container.querySelector('#yearTitle'),
       prevMonthBtn: this.container.querySelector('#prevMonth'),
       nextMonthBtn: this.container.querySelector('#nextMonth'),
       calendarGrid: this.container.querySelector('#calendarGrid'),
+      monthSelector: this.container.querySelector('#monthSelector'),
+      yearSelector: this.container.querySelector('#yearSelector'),
       hoursGrid: this.container.querySelector('#hoursGrid'),
       tenMinutesGrid: this.container.querySelector('#tenMinutesGrid'),
       minutesGrid: this.container.querySelector('#minutesGrid'),
@@ -253,6 +261,10 @@ class DateTimePicker {
     // Calendar navigation
     this.elements.prevMonthBtn.addEventListener('click', () => this.changeMonth(-1));
     this.elements.nextMonthBtn.addEventListener('click', () => this.changeMonth(1));
+    
+    // Month and year selection dialogs
+    this.elements.monthTitle.addEventListener('click', () => this.showMonthSelector());
+    this.elements.yearTitle.addEventListener('click', () => this.showYearSelector());
 
     // Track cursor position in input field
     this.elements.dateInput.addEventListener('click', (e) => {
@@ -403,7 +415,7 @@ class DateTimePicker {
   }
 
   /**
-   * Updates the month title
+   * Updates the month and year titles
    */
   updateMonthTitle() {
     const months = [
@@ -411,7 +423,153 @@ class DateTimePicker {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    this.elements.monthTitle.textContent = `${months[this.state.currentDate.getMonth()]} ${this.state.currentDate.getFullYear()}`;
+    this.elements.monthTitle.textContent = months[this.state.currentDate.getMonth()];
+    this.elements.yearTitle.textContent = this.state.currentDate.getFullYear();
+  }
+  
+  /**
+   * Shows the month selector dialog
+   */
+  showMonthSelector() {
+    // Hide year selector if it's open
+    this.elements.yearSelector.style.display = 'none';
+    
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    // Create month grid (4x3)
+    this.elements.monthSelector.innerHTML = '';
+    this.elements.monthSelector.style.display = 'grid';
+    this.elements.monthSelector.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    this.elements.monthSelector.style.gridTemplateRows = 'repeat(3, 1fr)';
+    
+    // Add month buttons
+    months.forEach((month, index) => {
+      const monthElement = document.createElement('div');
+      monthElement.className = 'month-item';
+      monthElement.textContent = month;
+      
+      // Highlight the current month
+      if (index === this.state.currentDate.getMonth()) {
+        monthElement.classList.add('selected');
+      }
+      
+      // Add click handler
+      monthElement.addEventListener('click', () => {
+        this.selectMonth(index);
+        this.elements.monthSelector.style.display = 'none';
+      });
+      
+      this.elements.monthSelector.appendChild(monthElement);
+    });
+    
+    // Close when clicking outside
+    setTimeout(() => {
+      const closeMonthSelector = (e) => {
+        if (!this.elements.monthSelector.contains(e.target) && 
+            e.target !== this.elements.monthTitle) {
+          this.elements.monthSelector.style.display = 'none';
+          document.removeEventListener('click', closeMonthSelector);
+        }
+      };
+      document.addEventListener('click', closeMonthSelector);
+    }, 0);
+  }
+  
+  /**
+   * Shows the year selector dialog
+   */
+  showYearSelector() {
+    // Hide month selector if it's open
+    this.elements.monthSelector.style.display = 'none';
+    
+    // Create year grid (5 columns)
+    this.elements.yearSelector.innerHTML = '';
+    this.elements.yearSelector.style.display = 'grid';
+    this.elements.yearSelector.style.gridTemplateColumns = 'repeat(5, 1fr)';
+    this.elements.yearSelector.style.maxHeight = '200px';
+    this.elements.yearSelector.style.overflowY = 'auto';
+    
+    const currentYear = this.state.currentDate.getFullYear();
+    const startYear = 1900;
+    const endYear = 2100;
+    
+    // Add year buttons
+    for (let year = startYear; year <= endYear; year++) {
+      const yearElement = document.createElement('div');
+      yearElement.className = 'year-item';
+      yearElement.textContent = year;
+      
+      // Highlight the current year
+      if (year === currentYear) {
+        yearElement.classList.add('selected');
+        
+        // Scroll to the selected year
+        setTimeout(() => {
+          yearElement.scrollIntoView({ block: 'center' });
+        }, 0);
+      }
+      
+      // Add click handler
+      yearElement.addEventListener('click', () => {
+        this.selectYear(year);
+        this.elements.yearSelector.style.display = 'none';
+      });
+      
+      this.elements.yearSelector.appendChild(yearElement);
+    }
+    
+    // Close when clicking outside
+    setTimeout(() => {
+      const closeYearSelector = (e) => {
+        if (!this.elements.yearSelector.contains(e.target) && 
+            e.target !== this.elements.yearTitle) {
+          this.elements.yearSelector.style.display = 'none';
+          document.removeEventListener('click', closeYearSelector);
+        }
+      };
+      document.addEventListener('click', closeYearSelector);
+    }, 0);
+  }
+  
+  /**
+   * Selects a month
+   * @param {number} month - Month index (0-11)
+   */
+  selectMonth(month) {
+    this.state.currentDate.setMonth(month);
+    this.updateMonthTitle();
+    this.renderCalendarDays();
+    
+    // Update month in the input field
+    const monthString = (month + 1).toString().padStart(2, '0');
+    this.overwriteDigitsInInput(3, monthString);
+    
+    // Call the callback if provided
+    if (typeof this.config.onChange === 'function') {
+      this.config.onChange(this.state.selectedDate);
+    }
+  }
+  
+  /**
+   * Selects a year
+   * @param {number} year - Year value
+   */
+  selectYear(year) {
+    this.state.currentDate.setFullYear(year);
+    this.updateMonthTitle();
+    this.renderCalendarDays();
+    
+    // Update year in the input field
+    const yearString = year.toString();
+    this.overwriteDigitsInInput(6, yearString);
+    
+    // Call the callback if provided
+    if (typeof this.config.onChange === 'function') {
+      this.config.onChange(this.state.selectedDate);
+    }
   }
 
   /**

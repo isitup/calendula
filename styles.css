@@ -74,15 +74,14 @@ body {
 }
 
 .calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: relative;
   padding: 12px;
   background-color: #f9f9f9;
 }
 
 .month-nav {
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -99,9 +98,45 @@ body {
   background-color: #f0f0f0;
 }
 
-.month-title {
+.month-year-selector {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.month-title, .year-title {
   font-weight: bold;
-  margin: 0 12px;
+  margin: 0 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.month-title:hover, .year-title:hover {
+  background-color: #f0f0f0;
+}
+
+.month-selector, .year-selector {
+  position: absolute;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  z-index: 10;
+  width: 280px;
+  margin-top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.month-item, .year-item {
+  padding: 8px 0;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.month-item:hover, .year-item:hover {
+  background-color: #f0f0f0;
 }
 
 .calendar-grid {
@@ -137,12 +172,16 @@ body {
   background-color: #e6f2ff;
 }
 
-.selected {
+.calendar-day.selected,
+.month-item.selected,
+.year-item.selected {
   background-color: #007bff;
   color: white;
 }
 
-.selected:hover {
+.calendar-day.selected:hover,
+.month-item.selected:hover,
+.year-item.selected:hover {
   background-color: #0069d9;
 }
 
