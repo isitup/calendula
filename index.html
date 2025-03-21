@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Календарь с выбором даты и времени</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .date-time-picker {
+      max-width: 550px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin: 0 auto;
+      display: flex;
+    }
+    
+    .calendar-container {
+      flex: 1;
+      border-right: 1px solid #eee;
+    }
+    
+    .time-container {
+      width: 240px;
+    }
+    
+    .input-container {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .date-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: #f9f9f9;
+    }
+    
+    .month-nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    .month-nav button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    .month-nav button:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .month-title {
+      font-weight: bold;
+      margin: 0 12px;
+    }
+    
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 8px;
+    }
+    
+    .weekday {
+      text-align: center;
+      font-weight: bold;
+      color: #666;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+    
+    .calendar-day {
+      text-align: center;
+      padding: 8px 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .calendar-day:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .empty-day {
+      visibility: hidden;
+    }
+    
+    .today {
+      background-color: #e6f2ff;
+    }
+    
+    .selected {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .selected:hover {
+      background-color: #0069d9;
+    }
+    
+    .time-section {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .time-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #666;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .time-grid {
+      display: grid;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    
+    .hours-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    
+    .ten-minutes-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    
+    .minutes-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .time-item {
+      padding: 6px 0;
+      font-size: 13px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+    }
+    
+    .time-item:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .time-item.selected {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .time-item.selected:hover {
+      background-color: #0069d9;
+    }
+
+    .seconds-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  </style>
+</head>
+<body>
+  <div class="input-container">
+    <input type="text" class="date-input" id="dateInput" placeholder="DD.MM.YYYY HH:MM:SS">
+  </div>
+  
+  <div class="date-time-picker" id="datePicker">
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <div class="month-nav">
+          <button id="prevMonth">&lt;</button>
+          <div class="month-title" id="monthTitle">Март 2025</div>
+          <button id="nextMonth">&gt;</button>
+        </div>
+      </div>
+      
+      <div class="calendar-grid" id="calendarGrid">
+        <!-- Days of week will be added using JavaScript -->
+        <!-- Days of month will be added using JavaScript -->
+      </div>
+    </div>
+    
+    <div class="time-container">
+      <div class="time-section">
+        <div class="time-title">Hours</div>
+        <div class="time-grid hours-grid" id="hoursGrid">
+          <!-- Hours will be added using JavaScript -->
+        </div>
+      </div>
+      
+      <div class="time-section">
+        <div class="time-title">Minutes</div>
+        <div class="time-section-container">
+          <div class="time-title" style="font-size: 12px; margin-top: 8px;">Tens</div>
+          <div class="time-grid ten-minutes-grid" id="tenMinutesGrid">
+            <!-- Tens of minutes will be added using JavaScript -->
+          </div>
+          
+          <div class="time-title" style="font-size: 12px; margin-top: 8px;">Minutes</div>
+          <div class="time-grid minutes-grid" id="minutesGrid">
+            <!-- Minutes will be added using JavaScript -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="time-section">
+        <div class="time-title">Seconds</div>
+        <div class="time-grid seconds-grid" id="secondsGrid">
+          <!-- Seconds will be added using JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const datePicker = {
+        elements: {
+          dateInput: document.getElementById('dateInput'),
+          monthTitle: document.getElementById('monthTitle'),
+          prevMonthBtn: document.getElementById('prevMonth'),
+          nextMonthBtn: document.getElementById('nextMonth'),
+          calendarGrid: document.getElementById('calendarGrid'),
+          hoursGrid: document.getElementById('hoursGrid'),
+          tenMinutesGrid: document.getElementById('tenMinutesGrid'),
+          minutesGrid: document.getElementById('minutesGrid'),
+          secondsGrid: document.getElementById('secondsGrid')
+        },
+        
+        state: {
+          currentDate: new Date(),
+          selectedDate: new Date(),
+          selectedHour: new Date().getHours(),
+          selectedTenMinute: Math.floor(new Date().getMinutes() / 10) * 10,
+          selectedMinute: new Date().getMinutes() % 10,
+          selectedSecond: new Date().getSeconds()
+        },
+        
+        init: function() {
+          this.renderCalendarDays();
+          this.renderHours();
+          this.renderTenMinutes();
+          this.renderMinutes();
+          this.renderSeconds();
+          this.updateDateInput();
+          this.bindEvents();
+        },
+        
+        bindEvents: function() {
+          this.elements.prevMonthBtn.addEventListener('click', () => this.changeMonth(-1));
+          this.elements.nextMonthBtn.addEventListener('click', () => this.changeMonth(1));
+          this.elements.dateInput.addEventListener('change', () => this.handleInputChange());
+          this.elements.dateInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+              this.handleInputChange();
+            }
+          });
+        },
+        
+        updateMonthTitle: function() {
+          const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+          ];
+          
+          this.elements.monthTitle.textContent = `${months[this.state.currentDate.getMonth()]} ${this.state.currentDate.getFullYear()}`;
+        },
+        
+        changeMonth: function(delta) {
+          this.state.currentDate.setMonth(this.state.currentDate.getMonth() + delta);
+          this.updateMonthTitle();
+          this.renderCalendarDays();
+        },
+        
+        renderCalendarDays: function() {
+          // Очищаем календарь
+          this.elements.calendarGrid.innerHTML = '';
+          
+          // Добавляем дни недели
+          const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          weekdays.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'weekday';
+            dayElement.textContent = day;
+            this.elements.calendarGrid.appendChild(dayElement);
+          });
+          
+          // Get month days
+          const year = this.state.currentDate.getFullYear();
+          const month = this.state.currentDate.getMonth();
+          
+          // First day of the month
+          const firstDay = new Date(year, month, 1);
+          // Getting the day of the week (0-6, where 0 is Sunday)
+          let firstDayOfWeek = firstDay.getDay();
+          // Convert to a format where 0 is Monday and 6 is Sunday
+          firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+          
+          // Number of days in a month
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          
+          // Adding empty cells for the previous month's days
+          for (let i = 0; i < firstDayOfWeek; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'calendar-day empty-day';
+            this.elements.calendarGrid.appendChild(emptyDay);
+          }
+          
+          // Adding the current month's days
+          const today = new Date();
+          for (let day = 1; day <= daysInMonth; day++) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            dayElement.textContent = day;
+            
+            // Highlighting today's day
+            if (day === today.getDate() && 
+                month === today.getMonth() && 
+                year === today.getFullYear()) {
+              dayElement.classList.add('today');
+            }
+            
+            // Highlighting the selected day
+            if (day === this.state.selectedDate.getDate() && 
+                month === this.state.selectedDate.getMonth() && 
+                year === this.state.selectedDate.getFullYear()) {
+              dayElement.classList.add('selected');
+            }
+            
+            // Click handler
+            dayElement.addEventListener('click', () => {
+              this.selectDate(day);
+            });
+            
+            this.elements.calendarGrid.appendChild(dayElement);
+          }
+          
+          this.updateMonthTitle();
+        },
+        
+        selectDate: function(day) {
+          // Update the selected date
+          this.state.selectedDate = new Date(
+            this.state.currentDate.getFullYear(),
+            this.state.currentDate.getMonth(),
+            day,
+            this.state.selectedHour,
+            this.state.selectedTenMinute + this.state.selectedMinute,
+            this.state.selectedSecond
+          );
+          
+          // Redrawing the calendar
+          this.renderCalendarDays();
+          // Update the value in the input field
+          this.updateDateInput();
+        },
+        
+        renderHours: function() {
+          this.elements.hoursGrid.innerHTML = '';
+          
+          // Create buttons for the clock (0-23)
+          for (let hour = 0; hour < 24; hour++) {
+            const hourElement = document.createElement('div');
+            hourElement.className = 'time-item';
+            hourElement.textContent = hour.toString().padStart(2, '0');
+            
+            if (hour === this.state.selectedHour) {
+              hourElement.classList.add('selected');
+            }
+            
+            hourElement.addEventListener('click', () => {
+              this.selectHour(hour);
+            });
+            
+            this.elements.hoursGrid.appendChild(hourElement);
+          }
+        },
+        
+        selectHour: function(hour) {
+          this.state.selectedHour = hour;
+          
+          // Update the selected time
+          this.state.selectedDate.setHours(hour);
+          
+          // Redrawing the clock
+          this.renderHours();
+          // Update the value in the input field
+          this.updateDateInput();
+        },
+        
+        renderTenMinutes: function() {
+          this.elements.tenMinutesGrid.innerHTML = '';
+          
+          // Create buttons for tens of minutes (0, 10, 20, 30, 40, 50)
+          const tenMinutes = [0, 10, 20, 30, 40, 50];
+          
+          tenMinutes.forEach(minute => {
+            const minuteElement = document.createElement('div');
+            minuteElement.className = 'time-item';
+            minuteElement.textContent = minute.toString().padStart(2, '0');
+            
+            if (minute === this.state.selectedTenMinute) {
+              minuteElement.classList.add('selected');
+            }
+            
+            minuteElement.addEventListener('click', () => {
+              this.selectTenMinute(minute);
+            });
+            
+            this.elements.tenMinutesGrid.appendChild(minuteElement);
+          });
+        },
+        
+        selectTenMinute: function(minute) {
+          this.state.selectedTenMinute = minute;
+          
+          // Update the selected time
+          this.state.selectedDate.setMinutes(minute + this.state.selectedMinute);
+          
+          // Redrawing for tens of minutes
+          this.renderTenMinutes();
+          // Update the value in the input field
+          this.updateDateInput();
+        },
+        
+        renderMinutes: function() {
+          this.elements.minutesGrid.innerHTML = '';
+          
+          // Create buttons for units of minutes (0-9)
+          for (let minute = 0; minute < 10; minute++) {
+            const minuteElement = document.createElement('div');
+            minuteElement.className = 'time-item';
+            minuteElement.textContent = minute.toString();
+            
+            if (minute === this.state.selectedMinute) {
+              minuteElement.classList.add('selected');
+            }
+            
+            minuteElement.addEventListener('click', () => {
+              this.selectMinute(minute);
+            });
+            
+            this.elements.minutesGrid.appendChild(minuteElement);
+          }
+        },
+        
+        selectMinute: function(minute) {
+          this.state.selectedMinute = minute;
+          
+          // Update the selected time
+          this.state.selectedDate.setMinutes(this.state.selectedTenMinute + minute);
+          
+          // Redrawing the minutes
+          this.renderMinutes();
+          // Update the value in the input field
+          this.updateDateInput();
+        },
+        
+        renderSeconds: function() {
+          this.elements.secondsGrid.innerHTML = '';
+          
+          // Create buttons for seconds (0-59, in increments of 5)
+          for (let second = 0; second < 60; second += 5) {
+            const secondElement = document.createElement('div');
+            secondElement.className = 'time-item';
+            secondElement.textContent = second.toString().padStart(2, '0');
+            
+            if (second <= this.state.selectedSecond && this.state.selectedSecond < second + 5) {
+              secondElement.classList.add('selected');
+            }
+            
+            secondElement.addEventListener('click', () => {
+              this.selectSecond(second);
+            });
+            
+            this.elements.secondsGrid.appendChild(secondElement);
+          }
+        },
+        
+        selectSecond: function(second) {
+          this.state.selectedSecond = second;
+          
+          // Update the selected time
+          this.state.selectedDate.setSeconds(second);
+          
+          // Redrawing the seconds
+          this.renderSeconds();
+          // Update the value in the input field
+          this.updateDateInput();
+        },
+        
+        updateDateInput: function() {
+          // Format the date for the input field (DD.MM.YYYY HH:MM:SS)
+          const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
+          const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
+          const year = this.state.selectedDate.getFullYear();
+          const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
+          const minutes = (this.state.selectedTenMinute + this.state.selectedMinute).toString().padStart(2, '0');
+          const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
+          
+          this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+        },
+        
+        handleInputChange: function() {
+          // Get the value from the input field
+          const inputValue = this.elements.dateInput.value;
+          
+          // Checking the format (DD.MM.YYYY HH:MM:SS)
+          const regex = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
+          const match = inputValue.match(regex);
+          
+          if (match) {
+            const [_, day, month, year, hours, minutes, seconds] = match;
+            
+            // Create a new date from the entered value
+            const newDate = new Date(
+              parseInt(year),
+              parseInt(month) - 1,
+              parseInt(day),
+              parseInt(hours),
+              parseInt(minutes),
+              parseInt(seconds)
+            );
+            
+            // Check that the date is valid
+            if (!isNaN(newDate.getTime())) {
+              // We update all states
+              this.state.currentDate = new Date(newDate);
+              this.state.selectedDate = new Date(newDate);
+              this.state.selectedHour = newDate.getHours();
+              this.state.selectedTenMinute = Math.floor(newDate.getMinutes() / 10) * 10;
+              this.state.selectedMinute = newDate.getMinutes() % 10;
+              this.state.selectedSecond = newDate.getSeconds();
+              
+              // Redraw all components
+              this.renderCalendarDays();
+              this.renderHours();
+              this.renderTenMinutes();
+              this.renderMinutes();
+              this.renderSeconds();
+            } else {
+              // If the date is invalid, restore the current value
+              this.updateDateInput();
+            }
+          } else {
+            // If the format is incorrect, restore the current value
+            this.updateDateInput();
+          }
+        }
+      };
+      
+      // Initialize the calendar
+      datePicker.init();
+    });
+  </script>
+</body>
+</html>

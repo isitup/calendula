@@ -1,0 +1,11 @@
+/node_modules
+/vendor
+/.idea
+npm-debug.log
+.env
+*.tmp
+tmp.*
+
+_ide_helper.php
+.phpstorm.meta.php
+_ide_helper_models.php
