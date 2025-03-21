@@ -303,7 +303,8 @@
           selectedHour: new Date().getHours(),
           selectedTenMinute: Math.floor(new Date().getMinutes() / 10) * 10,
           selectedMinute: new Date().getMinutes() % 10,
-          selectedSecond: new Date().getSeconds()
+          selectedSecond: new Date().getSeconds(),
+          cursorPosition: 0
         },
         
         init: function() {
@@ -319,10 +320,64 @@
         bindEvents: function() {
           this.elements.prevMonthBtn.addEventListener('click', () => this.changeMonth(-1));
           this.elements.nextMonthBtn.addEventListener('click', () => this.changeMonth(1));
-          this.elements.dateInput.addEventListener('change', () => this.handleInputChange());
+          
+          // Handle clicks in the input field to track cursor position
+          this.elements.dateInput.addEventListener('click', (e) => {
+            this.state.cursorPosition = e.target.selectionStart;
+          });
+          
+          // Handle key presses for digit overwriting
+          this.elements.dateInput.addEventListener('keydown', (e) => {
+            // Only handle digit keys
+            if (/^\d$/.test(e.key)) {
+              e.preventDefault(); // Prevent default behavior
+              
+              const input = this.elements.dateInput;
+              const cursorPos = input.selectionStart;
+              this.state.cursorPosition = cursorPos;
+              
+              // Find next digit position
+              const currentValue = input.value;
+              let nextDigitPos = cursorPos;
+              
+              // Find the next digit position
+              while (nextDigitPos < currentValue.length && !/\d/.test(currentValue[nextDigitPos])) {
+                nextDigitPos++;
+              }
+              
+              if (nextDigitPos < currentValue.length) {
+                // Replace the digit at the found position
+                const newValue = 
+                  currentValue.substring(0, nextDigitPos) + 
+                  e.key + 
+                  currentValue.substring(nextDigitPos + 1);
+                
+                input.value = newValue;
+                
+                // Move cursor after the inserted digit
+                input.selectionStart = nextDigitPos + 1;
+                input.selectionEnd = nextDigitPos + 1;
+                this.state.cursorPosition = nextDigitPos + 1;
+                
+                // Update the calendar based on new input
+                this.handleInputChange(false);
+              }
+            }
+          });
+          
+          // Keep the Enter key behavior
           this.elements.dateInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') {
               this.handleInputChange();
+            }
+          });
+          
+          // When the input field receives focus, position cursor at beginning if not specifically positioned
+          this.elements.dateInput.addEventListener('focus', (e) => {
+            if (this.state.cursorPosition === undefined || this.state.cursorPosition === null) {
+              e.target.selectionStart = 0;
+              e.target.selectionEnd = 0;
+              this.state.cursorPosition = 0;
             }
           });
         },
@@ -340,6 +395,10 @@
           this.state.currentDate.setMonth(this.state.currentDate.getMonth() + delta);
           this.updateMonthTitle();
           this.renderCalendarDays();
+          
+          // Update the month in the input field with digit overwrite
+          const month = (this.state.currentDate.getMonth() + 1).toString().padStart(2, '0');
+          this.overwriteDigitsInInput(3, month);
         },
         
         renderCalendarDays: function() {
@@ -421,8 +480,10 @@
           
           // Redrawing the calendar
           this.renderCalendarDays();
-          // Update the value in the input field
-          this.updateDateInput();
+          
+          // Update the value in the input field with digit overwrite for the day
+          const dayString = day.toString().padStart(2, '0');
+          this.overwriteDigitsInInput(0, dayString);
         },
         
         renderHours: function() {
@@ -454,8 +515,10 @@
           
           // Redrawing the clock
           this.renderHours();
-          // Update the value in the input field
-          this.updateDateInput();
+          
+          // Update the value in the input field with digit overwrite
+          const hourString = hour.toString().padStart(2, '0');
+          this.overwriteDigitsInInput(11, hourString);
         },
         
         renderTenMinutes: function() {
@@ -489,8 +552,10 @@
           
           // Redrawing for tens of minutes
           this.renderTenMinutes();
-          // Update the value in the input field
-          this.updateDateInput();
+          
+          // Update the value in the input field with digit overwrite
+          const minuteString = (minute + this.state.selectedMinute).toString().padStart(2, '0');
+          this.overwriteDigitsInInput(14, minuteString);
         },
         
         renderMinutes: function() {
@@ -522,8 +587,10 @@
           
           // Redrawing the minutes
           this.renderMinutes();
-          // Update the value in the input field
-          this.updateDateInput();
+          
+          // Update the value in the input field with digit overwrite
+          const minuteString = (this.state.selectedTenMinute + minute).toString().padStart(2, '0');
+          this.overwriteDigitsInInput(14, minuteString);
         },
         
         renderSeconds: function() {
@@ -555,8 +622,59 @@
           
           // Redrawing the seconds
           this.renderSeconds();
-          // Update the value in the input field
-          this.updateDateInput();
+          
+          // Update the value in the input field with digit overwrite
+          const secondString = second.toString().padStart(2, '0');
+          this.overwriteDigitsInInput(17, secondString);
+        },
+        
+        // Helper method to overwrite digits in the input field
+        overwriteDigitsInInput: function(startPosition, newValue) {
+          const input = this.elements.dateInput;
+          const currentValue = input.value;
+          
+          // If input is empty, update with full date
+          if (!currentValue) {
+            this.updateDateInput();
+            return;
+          }
+          
+          let newInputValue = '';
+          let valueIndex = 0;
+          
+          // Build the new string by replacing only the digits at positions
+          for (let i = 0; i < currentValue.length; i++) {
+            if (i >= startPosition && valueIndex < newValue.length) {
+              // If we're at a digit position to replace
+              if (/\d/.test(currentValue[i])) {
+                // Replace the digit
+                newInputValue += newValue[valueIndex];
+                valueIndex++;
+              } else {
+                // Keep non-digit characters (like . : or space)
+                newInputValue += currentValue[i];
+              }
+            } else {
+              // Keep characters outside our replacement range
+              newInputValue += currentValue[i];
+            }
+          }
+          
+          // Update input value
+          input.value = newInputValue;
+          
+          // Update the calendar UI to match
+          this.handleInputChange(false);
+          
+          // Set cursor position after the last digit we inserted
+          input.focus();
+          const newPosition = startPosition + newValue.length + 
+                             (currentValue[startPosition + 1] === '.' || 
+                              currentValue[startPosition + 1] === ':' || 
+                              currentValue[startPosition + 1] === ' ' ? 1 : 0);
+          input.selectionStart = newPosition;
+          input.selectionEnd = newPosition;
+          this.state.cursorPosition = newPosition;
         },
         
         updateDateInput: function() {
@@ -571,7 +689,7 @@
           this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
         },
         
-        handleInputChange: function() {
+        handleInputChange: function(updateInput = true) {
           // Get the value from the input field
           const inputValue = this.elements.dateInput.value;
           
@@ -608,13 +726,26 @@
               this.renderTenMinutes();
               this.renderMinutes();
               this.renderSeconds();
+              
+              // Only update the input field if requested (to avoid infinite loops)
+              if (updateInput) {
+                this.updateDateInput();
+              }
+              
+              return true;
             } else {
               // If the date is invalid, restore the current value
-              this.updateDateInput();
+              if (updateInput) {
+                this.updateDateInput();
+              }
+              return false;
             }
           } else {
             // If the format is incorrect, restore the current value
-            this.updateDateInput();
+            if (updateInput) {
+                this.updateDateInput();
+            }
+            return false;
           }
         }
       };
