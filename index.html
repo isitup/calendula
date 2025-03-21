@@ -18,7 +18,7 @@
     }
     
     .date-time-picker {
-      max-width: 550px;
+      max-width: 650px;
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -33,7 +33,7 @@
     }
     
     .time-container {
-      width: 240px;
+      width: 340px;
     }
     
     .input-container {
@@ -145,12 +145,9 @@
       grid-template-columns: repeat(6, 1fr);
     }
     
-    .ten-minutes-grid {
-      grid-template-columns: repeat(6, 1fr);
-    }
-    
     .minutes-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(6, 1fr);
     }
     
     .time-item {
@@ -211,16 +208,8 @@
       
       <div class="time-section">
         <div class="time-title">Minutes</div>
-        <div class="time-section-container">
-          <div class="time-title" style="font-size: 12px; margin-top: 8px;">Tens</div>
-          <div class="time-grid ten-minutes-grid" id="tenMinutesGrid">
-            <!-- Tens of minutes will be added using JavaScript -->
-          </div>
-          
-          <div class="time-title" style="font-size: 12px; margin-top: 8px;">Minutes</div>
-          <div class="time-grid minutes-grid" id="minutesGrid">
-            <!-- Minutes will be added using JavaScript -->
-          </div>
+        <div class="time-grid minutes-grid" id="minutesGrid">
+          <!-- Minutes will be added using JavaScript (0-59) -->
         </div>
       </div>
       
@@ -243,7 +232,6 @@
           nextMonthBtn: document.getElementById('nextMonth'),
           calendarGrid: document.getElementById('calendarGrid'),
           hoursGrid: document.getElementById('hoursGrid'),
-          tenMinutesGrid: document.getElementById('tenMinutesGrid'),
           minutesGrid: document.getElementById('minutesGrid'),
           secondsGrid: document.getElementById('secondsGrid')
         },
@@ -252,15 +240,13 @@
           currentDate: new Date(),
           selectedDate: new Date(),
           selectedHour: new Date().getHours(),
-          selectedTenMinute: Math.floor(new Date().getMinutes() / 10) * 10,
-          selectedMinute: new Date().getMinutes() % 10,
+          selectedMinute: new Date().getMinutes(),
           selectedSecond: new Date().getSeconds()
         },
         
         init: function() {
           this.renderCalendarDays();
           this.renderHours();
-          this.renderTenMinutes();
           this.renderMinutes();
           this.renderSeconds();
           this.updateDateInput();
@@ -366,7 +352,7 @@
             this.state.currentDate.getMonth(),
             day,
             this.state.selectedHour,
-            this.state.selectedTenMinute + this.state.selectedMinute,
+            this.state.selectedMinute,
             this.state.selectedSecond
           );
           
@@ -409,49 +395,14 @@
           this.updateDateInput();
         },
         
-        renderTenMinutes: function() {
-          this.elements.tenMinutesGrid.innerHTML = '';
-          
-          // Create buttons for tens of minutes (0, 10, 20, 30, 40, 50)
-          const tenMinutes = [0, 10, 20, 30, 40, 50];
-          
-          tenMinutes.forEach(minute => {
-            const minuteElement = document.createElement('div');
-            minuteElement.className = 'time-item';
-            minuteElement.textContent = minute.toString().padStart(2, '0');
-            
-            if (minute === this.state.selectedTenMinute) {
-              minuteElement.classList.add('selected');
-            }
-            
-            minuteElement.addEventListener('click', () => {
-              this.selectTenMinute(minute);
-            });
-            
-            this.elements.tenMinutesGrid.appendChild(minuteElement);
-          });
-        },
-        
-        selectTenMinute: function(minute) {
-          this.state.selectedTenMinute = minute;
-          
-          // Update the selected time
-          this.state.selectedDate.setMinutes(minute + this.state.selectedMinute);
-          
-          // Redrawing for tens of minutes
-          this.renderTenMinutes();
-          // Update the value in the input field
-          this.updateDateInput();
-        },
-        
         renderMinutes: function() {
           this.elements.minutesGrid.innerHTML = '';
           
-          // Create buttons for units of minutes (0-9)
-          for (let minute = 0; minute < 10; minute++) {
+          // Create grid of 60 minutes (0-59) in a 6x10 grid
+          for (let minute = 0; minute < 60; minute++) {
             const minuteElement = document.createElement('div');
             minuteElement.className = 'time-item';
-            minuteElement.textContent = minute.toString();
+            minuteElement.textContent = minute.toString().padStart(2, '0');
             
             if (minute === this.state.selectedMinute) {
               minuteElement.classList.add('selected');
@@ -469,7 +420,7 @@
           this.state.selectedMinute = minute;
           
           // Update the selected time
-          this.state.selectedDate.setMinutes(this.state.selectedTenMinute + minute);
+          this.state.selectedDate.setMinutes(minute);
           
           // Redrawing the minutes
           this.renderMinutes();
@@ -516,7 +467,7 @@
           const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
           const year = this.state.selectedDate.getFullYear();
           const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
-          const minutes = (this.state.selectedTenMinute + this.state.selectedMinute).toString().padStart(2, '0');
+          const minutes = this.state.selectedDate.getMinutes().toString().padStart(2, '0');
           const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
           
           this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
@@ -549,14 +500,12 @@
               this.state.currentDate = new Date(newDate);
               this.state.selectedDate = new Date(newDate);
               this.state.selectedHour = newDate.getHours();
-              this.state.selectedTenMinute = Math.floor(newDate.getMinutes() / 10) * 10;
-              this.state.selectedMinute = newDate.getMinutes() % 10;
+              this.state.selectedMinute = newDate.getMinutes();
               this.state.selectedSecond = newDate.getSeconds();
               
               // Redraw all components
               this.renderCalendarDays();
               this.renderHours();
-              this.renderTenMinutes();
               this.renderMinutes();
               this.renderSeconds();
             } else {
