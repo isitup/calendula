@@ -338,6 +338,72 @@
               return;
             }
             
+            // Handle Backspace key - replace previous digit with 0
+            if (e.key === 'Backspace') {
+              e.preventDefault();
+              const input = this.elements.dateInput;
+              const cursorPos = input.selectionStart;
+              const currentValue = input.value;
+              
+              // Find previous digit position
+              let prevDigitPos = cursorPos - 1;
+              while (prevDigitPos >= 0 && !/\d/.test(currentValue[prevDigitPos])) {
+                prevDigitPos--;
+              }
+              
+              if (prevDigitPos >= 0) {
+                // Replace the digit with 0
+                const newValue = 
+                  currentValue.substring(0, prevDigitPos) + 
+                  '0' + 
+                  currentValue.substring(prevDigitPos + 1);
+                
+                input.value = newValue;
+                
+                // Move cursor to the position of the replaced digit
+                input.selectionStart = prevDigitPos;
+                input.selectionEnd = prevDigitPos;
+                this.state.cursorPosition = prevDigitPos;
+                
+                // Update the calendar
+                this.handleInputChange(false);
+              }
+              return;
+            }
+            
+            // Handle Delete key - replace next digit with 0
+            if (e.key === 'Delete') {
+              e.preventDefault();
+              const input = this.elements.dateInput;
+              const cursorPos = input.selectionStart;
+              const currentValue = input.value;
+              
+              // Find next digit position
+              let nextDigitPos = cursorPos;
+              while (nextDigitPos < currentValue.length && !/\d/.test(currentValue[nextDigitPos])) {
+                nextDigitPos++;
+              }
+              
+              if (nextDigitPos < currentValue.length) {
+                // Replace the digit with 0
+                const newValue = 
+                  currentValue.substring(0, nextDigitPos) + 
+                  '0' + 
+                  currentValue.substring(nextDigitPos + 1);
+                
+                input.value = newValue;
+                
+                // Keep cursor at the same position
+                input.selectionStart = cursorPos;
+                input.selectionEnd = cursorPos;
+                this.state.cursorPosition = cursorPos;
+                
+                // Update the calendar
+                this.handleInputChange(false);
+              }
+              return;
+            }
+            
             e.preventDefault(); // Prevent default behavior for all other keys
             
             const input = this.elements.dateInput;
