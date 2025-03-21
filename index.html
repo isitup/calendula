@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Календарь с выбором даты и времени</title>
+  <title>Calendula</title>
   <style>
     * {
       box-sizing: border-box;
@@ -40,7 +40,7 @@
       background-color: #d8ecff;
     }
     
-    /* Медиа-запрос для мобильных устройств */
+    /* Media query for mobile device */
     @media (max-width: 540px) {
       .date-time-picker {
         flex-direction: column;
@@ -239,7 +239,7 @@
       <div class="calendar-header">
         <div class="month-nav">
           <button id="prevMonth">&lt;</button>
-          <div class="month-title" id="monthTitle">Март 2025</div>
+          <div class="month-title" id="monthTitle">March 2025</div>
           <button id="nextMonth">&gt;</button>
         </div>
       </div>
@@ -265,7 +265,7 @@
           <div class="time-grid ten-minutes-grid" id="tenMinutesGrid">
             <!-- Tens of minutes will be added using JavaScript -->
           </div>
-          
+
           <div class="time-title" style="font-size: 12px; margin-top: 8px;">Minutes</div>
           <div class="time-grid minutes-grid" id="minutesGrid">
             <!-- Minutes will be added using JavaScript -->
@@ -343,10 +343,10 @@
         },
         
         renderCalendarDays: function() {
-          // Очищаем календарь
+          // Clearing the calendar
           this.elements.calendarGrid.innerHTML = '';
           
-          // Добавляем дни недели
+          // Adding days of the week
           const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
           weekdays.forEach(day => {
             const dayElement = document.createElement('div');
