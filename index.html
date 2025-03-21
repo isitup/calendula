@@ -299,7 +299,8 @@
         
         // Configuration options
         config: {
-          showSeconds: false  // Set to false to hide the seconds section
+          showSeconds: false,  // Set to false to hide the seconds section
+          minuteStep: 1        // Minute step: 1, 5, or 10
         },
         
         state: {
@@ -313,19 +314,15 @@
         },
         
         init: function() {
-          // Apply configuration
-          this.applyConfig();
-          
-          // Render all components
+          // Render all components first
           this.renderCalendarDays();
           this.renderHours();
           this.renderTenMinutes();
           this.renderMinutes();
+          this.renderSeconds();
           
-          // Only render seconds if configured to show
-          if (this.config.showSeconds) {
-            this.renderSeconds();
-          }
+          // Now apply configuration settings to show/hide and format
+          this.applyConfig();
           
           this.updateDateInput();
           this.bindEvents();
@@ -337,6 +334,58 @@
           const secondsSection = document.querySelector('.time-section:last-child');
           if (secondsSection) {
             secondsSection.style.display = this.config.showSeconds ? 'block' : 'none';
+          }
+          
+          // Handle minute step display
+          const minuteStep = this.config.minuteStep;
+          
+          // Get minute containers
+          const minutesSection = document.querySelector('.time-section:nth-child(2)');
+          if (!minutesSection) return;
+          
+          const minuteSectionContainer = minutesSection.querySelector('.time-section-container');
+          if (!minuteSectionContainer) return;
+          
+          const minutesTitle = minutesSection.querySelector('.time-title');
+          const tenMinutesTitle = minuteSectionContainer.querySelector('.time-title:nth-child(1)');
+          const minutesSubtitle = minuteSectionContainer.querySelector('.time-title:nth-child(3)');
+          
+          const tenMinutesGrid = document.getElementById('tenMinutesGrid');
+          const minutesGrid = document.getElementById('minutesGrid');
+          
+          if (minuteStep === 1) {
+            // For standard step, use the existing layout with tens and units
+            minutesTitle.textContent = 'Minutes';
+            
+            // Show all components
+            tenMinutesTitle.style.display = 'block';
+            tenMinutesGrid.style.display = 'grid';
+            minutesSubtitle.style.display = 'block';
+            
+            // Default grid layouts
+            tenMinutesGrid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+            tenMinutesGrid.style.gridTemplateRows = 'repeat(1, 1fr)';
+            minutesGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            minutesGrid.style.gridTemplateRows = 'repeat(2, 1fr)';
+          } else {
+            // For step 5 or 10, use a single grid for all minutes
+            minutesTitle.textContent = 'Minutes';
+            
+            // Hide tens components
+            tenMinutesTitle.style.display = 'none';
+            tenMinutesGrid.style.display = 'none';
+            minutesSubtitle.style.display = 'none';
+            
+            // Configure grid layout based on step
+            if (minuteStep === 5) {
+              // 5-minute step: 12 buttons (0-55) in a 6x2 grid
+              minutesGrid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+              minutesGrid.style.gridTemplateRows = 'repeat(2, 1fr)';
+            } else if (minuteStep === 10) {
+              // 10-minute step: 6 buttons (0-50) in a 6x1 grid
+              minutesGrid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+              minutesGrid.style.gridTemplateRows = 'repeat(1, 1fr)';
+            }
           }
         },
         
@@ -735,36 +784,80 @@
         renderMinutes: function() {
           this.elements.minutesGrid.innerHTML = '';
           
-          // Create buttons for units of minutes (0-9)
-          for (let minute = 0; minute < 10; minute++) {
-            const minuteElement = document.createElement('div');
-            minuteElement.className = 'time-item';
-            minuteElement.textContent = minute.toString();
-            
-            if (minute === this.state.selectedMinute) {
-              minuteElement.classList.add('selected');
+          if (this.config.minuteStep === 1) {
+            // Standard mode - create buttons for units of minutes (0-9)
+            for (let minute = 0; minute < 10; minute++) {
+              const minuteElement = document.createElement('div');
+              minuteElement.className = 'time-item';
+              minuteElement.textContent = minute.toString();
+              
+              if (minute === this.state.selectedMinute) {
+                minuteElement.classList.add('selected');
+              }
+              
+              minuteElement.addEventListener('click', () => {
+                this.selectMinute(minute);
+              });
+              
+              this.elements.minutesGrid.appendChild(minuteElement);
             }
+          } else {
+            // Step mode (5 or 10) - create buttons for minutes with the configured step
+            const step = this.config.minuteStep;
+            const currentMinutes = this.state.selectedDate.getMinutes();
             
-            minuteElement.addEventListener('click', () => {
-              this.selectMinute(minute);
-            });
+            // Calculate how many minutes to display (12 for step 5, 6 for step 10)
+            const maxMinutes = 60 - step;
             
-            this.elements.minutesGrid.appendChild(minuteElement);
+            for (let minute = 0; minute <= maxMinutes; minute += step) {
+              const minuteElement = document.createElement('div');
+              minuteElement.className = 'time-item';
+              minuteElement.textContent = minute.toString().padStart(2, '0');
+              
+              // Check if this minute button should be selected
+              const isSelected = minute <= currentMinutes && currentMinutes < minute + step;
+              if (isSelected) {
+                minuteElement.classList.add('selected');
+              }
+              
+              minuteElement.addEventListener('click', () => {
+                this.selectMinute(minute);
+              });
+              
+              this.elements.minutesGrid.appendChild(minuteElement);
+            }
           }
         },
         
         selectMinute: function(minute) {
-          this.state.selectedMinute = minute;
-          
-          // Update the selected time
-          this.state.selectedDate.setMinutes(this.state.selectedTenMinute + minute);
-          
-          // Redrawing the minutes
-          this.renderMinutes();
-          
-          // Update the value in the input field with digit overwrite
-          const minuteString = (this.state.selectedTenMinute + minute).toString().padStart(2, '0');
-          this.overwriteDigitsInInput(14, minuteString);
+          if (this.config.minuteStep === 1) {
+            // Standard mode - keep track of tens and units separately
+            this.state.selectedMinute = minute;
+            
+            // Update the selected time
+            this.state.selectedDate.setMinutes(this.state.selectedTenMinute + minute);
+            
+            // Redrawing the minutes
+            this.renderMinutes();
+            
+            // Update the value in the input field with digit overwrite
+            const minuteString = (this.state.selectedTenMinute + minute).toString().padStart(2, '0');
+            this.overwriteDigitsInInput(14, minuteString);
+          } else {
+            // Step mode - directly set the minutes
+            this.state.selectedDate.setMinutes(minute);
+            
+            // For convenience, also update the state properties
+            this.state.selectedTenMinute = Math.floor(minute / 10) * 10;
+            this.state.selectedMinute = minute % 10;
+            
+            // Redrawing the minutes
+            this.renderMinutes();
+            
+            // Update the value in the input field with digit overwrite
+            const minuteString = minute.toString().padStart(2, '0');
+            this.overwriteDigitsInInput(14, minuteString);
+          }
         },
         
         renderSeconds: function() {
