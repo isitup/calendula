@@ -326,18 +326,28 @@
             this.state.cursorPosition = e.target.selectionStart;
           });
           
-          // Handle key presses for digit overwriting
+          // Handle key presses for digit overwriting and cursor movement
           this.elements.dateInput.addEventListener('keydown', (e) => {
-            // Only handle digit keys
+            // Ignore control keys like Shift, Alt, etc.
+            if (e.ctrlKey || e.altKey || e.metaKey) {
+              return;
+            }
+            
+            // Ignore navigation keys
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Tab'].includes(e.key)) {
+              return;
+            }
+            
+            e.preventDefault(); // Prevent default behavior for all other keys
+            
+            const input = this.elements.dateInput;
+            const cursorPos = input.selectionStart;
+            this.state.cursorPosition = cursorPos;
+            const currentValue = input.value;
+            
+            // Handle digit keys
             if (/^\d$/.test(e.key)) {
-              e.preventDefault(); // Prevent default behavior
-              
-              const input = this.elements.dateInput;
-              const cursorPos = input.selectionStart;
-              this.state.cursorPosition = cursorPos;
-              
               // Find next digit position
-              const currentValue = input.value;
               let nextDigitPos = cursorPos;
               
               // Find the next digit position
@@ -361,6 +371,29 @@
                 
                 // Update the calendar based on new input
                 this.handleInputChange(false);
+              }
+            } else {
+              // For non-digit keys, just move the cursor if on a non-digit
+              if (cursorPos < currentValue.length) {
+                if (!/\d/.test(currentValue[cursorPos])) {
+                  // Simply move the cursor forward by 1 if at a non-digit character
+                  input.selectionStart = cursorPos + 1;
+                  input.selectionEnd = cursorPos + 1;
+                  this.state.cursorPosition = cursorPos + 1;
+                } else {
+                  // If on a digit, find the next non-digit or digit position
+                  let nextPos = cursorPos;
+                  while (nextPos < currentValue.length && /\d/.test(currentValue[nextPos])) {
+                    nextPos++;
+                  }
+                  if (nextPos < currentValue.length) {
+                    // Move past the non-digit character
+                    nextPos++;
+                  }
+                  input.selectionStart = nextPos;
+                  input.selectionEnd = nextPos;
+                  this.state.cursorPosition = nextPos;
+                }
               }
             }
           });
