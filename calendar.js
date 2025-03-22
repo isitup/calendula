@@ -24,7 +24,8 @@ class DateTimePicker {
       minuteStep: options.minuteStep || 1,
       initialDate: options.initialDate || new Date(),
       inputField: options.inputField || null,
-      onChange: options.onChange || null
+      onChange: options.onChange || null,
+      dateFormat: options.dateFormat || null // Date format (for example, 'dd.MM.yyyy')
     };
 
     // Internal state
@@ -1001,7 +1002,7 @@ class DateTimePicker {
       this.overwriteDigitsInInput(11, hourString);
     }
 
-    // Вызываем колбэк, если задан
+    // Call the callback if specified
     if (typeof this.config.onChange === 'function') {
       this.config.onChange(this.state.selectedDate);
     }
@@ -1040,7 +1041,7 @@ class DateTimePicker {
   selectTenMinute(minute) {
     this.state.selectedTenMinute = minute;
 
-    // Обновляем выбранное время
+    // Update the selected time
     this.state.selectedDate.setMinutes(minute + this.state.selectedMinute);
 
     // Redraw tens of minutes
@@ -1059,7 +1060,7 @@ class DateTimePicker {
       this.overwriteDigitsInInput(14, minuteString);
     }
 
-    // Вызываем колбэк, если задан
+    // Call the callback if specified
     if (typeof this.config.onChange === 'function') {
       this.config.onChange(this.state.selectedDate);
     }
@@ -1128,13 +1129,13 @@ class DateTimePicker {
       // Standard mode - store tens and units separately
       this.state.selectedMinute = minute;
 
-      // Обновляем выбранное время
+      // Update the selected time
       this.state.selectedDate.setMinutes(this.state.selectedTenMinute + minute);
 
-      // Перерисовываем минуты
+      // Redrawing the minutes
       this.renderMinutes();
 
-      // Обновляем минуты в поле ввода
+      // Update the minutes in the input field
       const minuteString = (this.state.selectedTenMinute + minute).toString().padStart(2, '0');
       if (isMobile) {
         // For mobile, update value without changing focus
@@ -1151,10 +1152,10 @@ class DateTimePicker {
       this.state.selectedTenMinute = Math.floor(minute / 10) * 10;
       this.state.selectedMinute = minute % 10;
 
-      // Перерисовываем минуты
+      // Redrawing the minutes
       this.renderMinutes();
 
-      // Обновляем минуты в поле ввода
+      // Update the minutes in the input field
       const minuteString = minute.toString().padStart(2, '0');
       if (isMobile) {
         // For mobile, update value without changing focus
@@ -1236,7 +1237,7 @@ class DateTimePicker {
     const input = this.elements.dateInput;
     const currentValue = input.value;
 
-    // Если поле пустое, обновляем его полным значением даты
+    // If the field is empty, update it with the full date value.
     if (!currentValue) {
       this.updateDateInput();
       return;
@@ -1245,31 +1246,31 @@ class DateTimePicker {
     let newInputValue = '';
     let valueIndex = 0;
 
-    // Строим новую строку, заменяя только цифры на указанных позициях
+    // We build a new string, replacing only the numbers at the specified positions
     for (let i = 0; i < currentValue.length; i++) {
       if (i >= startPosition && valueIndex < newValue.length) {
-        // Если мы находимся на позиции цифры для замены
+        // If we are at the position of the number to replace
         if (/\d/.test(currentValue[i])) {
-          // Заменяем цифру
+          // We replace the number
           newInputValue += newValue[valueIndex];
           valueIndex++;
         } else {
-          // Сохраняем нецифровые символы (точки, двоеточия, пробелы)
+          // Preserve non-numeric characters (dots, colons, spaces)
           newInputValue += currentValue[i];
         }
       } else {
-        // Сохраняем символы вне диапазона замены
+        // Keep characters out of replacement range
         newInputValue += currentValue[i];
       }
     }
 
-    // Обновляем значение поля ввода
+    // Updating the value of the input field
     input.value = newInputValue;
 
-    // Обновляем календарь в соответствии с новым значением
+    // Update the calendar according to the new value
     this.handleInputChange(false);
 
-    // Устанавливаем позицию курсора после последней вставленной цифры
+    // Set the cursor position after the last inserted digit
     input.focus();
     const newPosition = startPosition + newValue.length +
                         (currentValue[startPosition + 1] === '.' ||
@@ -1402,6 +1403,21 @@ class DateTimePicker {
    * Updates the input field value based on the selected date
    */
   updateDateInput() {
+    // If a custom format is specified, use it
+    if (this.config.dateFormat) {
+      try {
+        // Use custom format (implementation would depend on specific formatting library)
+        // For now, we'll use the Intl.DateTimeFormat API as a simple example
+        const dateTimeFormat = this.createDateTimeFormatter();
+        this.elements.dateInput.value = dateTimeFormat.format(this.state.selectedDate);
+        return;
+      } catch (error) {
+        console.error('Error formatting date with custom format:', error);
+        // Fall back to default formatting
+      }
+    }
+    
+    // Default formatting (DD.MM.YYYY HH:MM:SS)
     // Formatting Basic Date and Time Components
     const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
     const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
@@ -1421,9 +1437,39 @@ class DateTimePicker {
         this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}`;
       }
     } else {
-      // Format without seconds (DD.MM.YYYY HH:MM)
+      // Format without seconds (DD.MM.YYYY)
       this.elements.dateInput.value = `${day}.${month}.${year}`;
     }
+  }
+  
+  /**
+   * Creates a date-time formatter based on current configuration
+   * @returns {Intl.DateTimeFormat} DateTimeFormat object
+   */
+  createDateTimeFormatter() {
+    const options = {};
+    
+    // Always include day, month, year for date part
+    options.day = '2-digit';
+    options.month = '2-digit';
+    options.year = 'numeric';
+    
+    // Add time components if enabled
+    if (this.config.showTime) {
+      options.hour = '2-digit';
+      options.minute = '2-digit';
+      
+      // Add seconds if enabled
+      if (this.config.showSeconds) {
+        options.second = '2-digit';
+      }
+      
+      // Use 24-hour format
+      options.hour12 = false;
+    }
+    
+    // Create formatter using specified locale or browser default
+    return new Intl.DateTimeFormat(this.config.dateFormat, options);
   }
 
   /**
@@ -1432,15 +1478,80 @@ class DateTimePicker {
    * @returns {boolean} Processing success
    */
   handleInputChange(updateInput = true) {
-    // Получаем значение из поля ввода
+    // Get the value from the input field
     const inputValue = this.elements.dateInput.value;
+    
+    // Let's try to parse the date from the format
+    let newDate;
+    
+    // If a custom format is specified, let's try to use it for parsing
+    if (this.config.dateFormat) {
+      try {
+        // For simplicity, we use the Date constructor taking into account the user's locale.
+        newDate = new Date(inputValue);
+      } catch (error) {
+        console.error('Error parsing date with custom format:', error);
+        // If it doesn't work, try standard formats
+        newDate = this.parseDateFromStandardFormat(inputValue);
+      }
+    } else {
+      // We use standard formats
+      newDate = this.parseDateFromStandardFormat(inputValue);
+    }
+    
+    // Check that the date is correct
+    if (newDate && !isNaN(newDate.getTime())) {
+      // We update all states
+      this.state.currentDate = new Date(newDate);
+      this.state.selectedDate = new Date(newDate);
+      this.state.selectedHour = newDate.getHours();
+      this.state.selectedTenMinute = Math.floor(newDate.getMinutes() / 10) * 10;
+      this.state.selectedMinute = newDate.getMinutes() % 10;
+      this.state.selectedSecond = newDate.getSeconds();
 
-    // Шаблоны для форматов с секундами и без
+      // Redraw all components
+      this.renderCalendarDays();
+      this.renderHours();
+      this.renderTenMinutes();
+      this.renderMinutes();
+
+      // Draw seconds only if they are displayed
+      if (this.config.showTime && this.config.showSeconds) {
+        this.renderSeconds();
+      }
+
+      // Update the input field only if requested (to avoid loops)
+      if (updateInput) {
+        this.updateDateInput();
+      }
+
+      // Call the callback if specified
+      if (typeof this.config.onChange === 'function') {
+        this.config.onChange(this.state.selectedDate);
+      }
+
+      return true;
+    } else {
+      // If the date is incorrect, restore the current value
+      if (updateInput) {
+        this.updateDateInput();
+      }
+      return false;
+    }
+  }
+  
+  /**
+   * Parses date from standard format DD.MM.YYYY [HH:MM[:SS]]
+   * @param {string} inputValue - Date string
+   * @returns {Date|null} A Date object or null if parsing fails
+   */
+  parseDateFromStandardFormat(inputValue) {
+    // Templates for formats with and without seconds
     const regexWithSeconds = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
     const regexWithoutSeconds = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/;
     const regexWithoutTime = /^(\d{2})\.(\d{2})\.(\d{4})$/;
 
-    // Пытаемся сопоставить с подходящим форматом в зависимости от настроек
+    // We try to match with the appropriate format depending on the settings
     let match;
     let seconds = 0;
 
@@ -1465,8 +1576,8 @@ class DateTimePicker {
         minutes = "0";
       }
 
-      // Создаем новую дату из введенного значения
-      const newDate = new Date(
+      // Create a new date from the entered value
+      return new Date(
         parseInt(year),
         parseInt(month) - 1,
         parseInt(day),
@@ -1474,53 +1585,9 @@ class DateTimePicker {
         parseInt(minutes),
         seconds
       );
-
-      // Проверяем, что дата корректна
-      if (!isNaN(newDate.getTime())) {
-        // Обновляем все состояния
-        this.state.currentDate = new Date(newDate);
-        this.state.selectedDate = new Date(newDate);
-        this.state.selectedHour = newDate.getHours();
-        this.state.selectedTenMinute = Math.floor(newDate.getMinutes() / 10) * 10;
-        this.state.selectedMinute = newDate.getMinutes() % 10;
-        this.state.selectedSecond = newDate.getSeconds();
-
-        // Перерисовываем все компоненты
-        this.renderCalendarDays();
-        this.renderHours();
-        this.renderTenMinutes();
-        this.renderMinutes();
-
-        // Draw seconds only if they are displayed
-        if (this.config.showTime && this.config.showSeconds) {
-          this.renderSeconds();
-        }
-
-        // Обновляем поле ввода только если запрошено (чтобы избежать циклов)
-        if (updateInput) {
-          this.updateDateInput();
-        }
-
-        // Вызываем колбэк, если задан
-        if (typeof this.config.onChange === 'function') {
-          this.config.onChange(this.state.selectedDate);
-        }
-
-        return true;
-      } else {
-        // Если дата некорректна, восстанавливаем текущее значение
-        if (updateInput) {
-          this.updateDateInput();
-        }
-        return false;
-      }
-    } else {
-      // Если формат некорректен, восстанавливаем текущее значение
-      if (updateInput) {
-          this.updateDateInput();
-      }
-      return false;
     }
+    
+    return null;
   }
 
   /**
@@ -1584,6 +1651,10 @@ class DateTimePicker {
 
     if (config.onChange !== undefined) {
       this.config.onChange = config.onChange;
+    }
+    
+    if (config.dateFormat !== undefined) {
+      this.config.dateFormat = config.dateFormat;
     }
 
     // Apply new configuration
