@@ -25,7 +25,8 @@ class DateTimePicker {
       initialDate: options.initialDate || new Date(),
       inputField: options.inputField || null,
       onChange: options.onChange || null,
-      dateFormat: options.dateFormat || null // Date format (for example, 'dd.MM.yyyy')
+      dateFormat: options.dateFormat || null, // Date format (for example, 'dd.MM.yyyy')
+      language: options.language || this.detectBrowserLanguage() // Interface language
     };
 
     // Internal state
@@ -39,19 +40,302 @@ class DateTimePicker {
       cursorPosition: 0
     };
     
-    // Initialize month names and abbreviations
-    this.monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    // Initialize translations
+    this.translations = this.getTranslations();
     
-    this.monthAbbreviations = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+    // Initialize month names and abbreviations from translations
+    const lang = this.getLanguage();
+    this.monthNames = this.translations[lang].monthNames;
+    this.monthAbbreviations = this.translations[lang].monthAbbreviations;
+    this.weekdayNames = this.translations[lang].weekdayNames;
 
     // Initialize component
     this.init();
+  }
+
+  /**
+   * Detects the user's browser language
+   * @returns {string} Language code
+   */
+  detectBrowserLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage;
+    // Extract just the language code (e.g., "en-US" -> "en")
+    const lang = browserLang.split('-')[0].toLowerCase();
+    
+    // Check if the language is supported
+    if (this.isSupportedLanguage(lang)) {
+      return lang;
+    }
+    
+    // Default to English if language is not supported
+    return 'en';
+  }
+  
+  /**
+   * Checks if a language is supported
+   * @param {string} lang - Language code
+   * @returns {boolean} True if supported
+   */
+  isSupportedLanguage(lang) {
+    const supportedLanguages = ['en', 'fr', 'es', 'ru', 'sr', 'tr', 'ar', 'zh', 'hi', 'uk', 'de'];
+    return supportedLanguages.includes(lang);
+  }
+  
+  /**
+   * Gets the current language
+   * @returns {string} Language code
+   */
+  getLanguage() {
+    // Use the configured language or English as fallback
+    return this.isSupportedLanguage(this.config.language) ? this.config.language : 'en';
+  }
+  
+  /**
+   * Gets translations for all languages
+   * @returns {Object} Translations object
+   */
+  getTranslations() {
+    return {
+      // English
+      'en': {
+        monthNames: [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ],
+        monthAbbreviations: [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ],
+        weekdayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        timeLabels: {
+          hours: 'Hours',
+          minutes: 'Minutes',
+          seconds: 'Seconds',
+          tens: 'Tens',
+          units: 'Minutes'
+        }
+      },
+      // German
+      'de': {
+        monthNames: [
+          'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+          'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+        ],
+        monthAbbreviations: [
+          'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+        ],
+        weekdayNames: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        timeLabels: {
+          hours: 'Stunden',
+          minutes: 'Minuten',
+          seconds: 'Sekunden',
+          tens: 'Zehner',
+          units: 'Minuten'
+        }
+      },
+      // Ukrainian
+      'uk': {
+        monthNames: [
+          'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+          'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
+        ],
+        monthAbbreviations: [
+          'Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер',
+          'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'
+        ],
+        weekdayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+        timeLabels: {
+          hours: 'Години',
+          minutes: 'Хвилини',
+          seconds: 'Секунди',
+          tens: 'Десятки',
+          units: 'Хвилини'
+        }
+      },
+      // Russian
+      'ru': {
+        monthNames: [
+          'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+          'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ],
+        monthAbbreviations: [
+          'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
+          'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+        ],
+        weekdayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+        timeLabels: {
+          hours: 'Часы',
+          minutes: 'Минуты',
+          seconds: 'Секунды',
+          tens: 'Десятки',
+          units: 'Минуты'
+        }
+      },
+      // French
+      'fr': {
+        monthNames: [
+          'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+          'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+        ],
+        monthAbbreviations: [
+          'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
+          'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
+        ],
+        weekdayNames: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        timeLabels: {
+          hours: 'Heures',
+          minutes: 'Minutes',
+          seconds: 'Secondes',
+          tens: 'Dizaines',
+          units: 'Minutes'
+        }
+      },
+      // Spanish
+      'es': {
+        monthNames: [
+          'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ],
+        monthAbbreviations: [
+          'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+        ],
+        weekdayNames: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        timeLabels: {
+          hours: 'Horas',
+          minutes: 'Minutos',
+          seconds: 'Segundos',
+          tens: 'Decenas',
+          units: 'Minutos'
+        }
+      },
+      // Serbian
+      'sr': {
+        monthNames: [
+          'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
+          'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'
+        ],
+        monthAbbreviations: [
+          'Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun',
+          'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'
+        ],
+        weekdayNames: ['Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub', 'Ned'],
+        timeLabels: {
+          hours: 'Sati',
+          minutes: 'Minuti',
+          seconds: 'Sekunde',
+          tens: 'Desetice',
+          units: 'Minute'
+        }
+      },
+      // Turkish
+      'tr': {
+        monthNames: [
+          'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+          'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+        ],
+        monthAbbreviations: [
+          'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+          'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
+        ],
+        weekdayNames: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+        timeLabels: {
+          hours: 'Saat',
+          minutes: 'Dakika',
+          seconds: 'Saniye',
+          tens: 'Onlar',
+          units: 'Dakika'
+        }
+      },
+      // Arabic
+      'ar': {
+        monthNames: [
+          'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+          'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+        ],
+        monthAbbreviations: [
+          'ينا', 'فبر', 'مار', 'أبر', 'ماي', 'يون',
+          'يول', 'أغس', 'سبت', 'أكت', 'نوف', 'ديس'
+        ],
+        weekdayNames: ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'],
+        timeLabels: {
+          hours: 'ساعات',
+          minutes: 'دقائق',
+          seconds: 'ثواني',
+          tens: 'عشرات',
+          units: 'دقائق'
+        }
+      },
+      // Chinese
+      'zh': {
+        monthNames: [
+          '一月', '二月', '三月', '四月', '五月', '六月',
+          '七月', '八月', '九月', '十月', '十一月', '十二月'
+        ],
+        monthAbbreviations: [
+          '一月', '二月', '三月', '四月', '五月', '六月',
+          '七月', '八月', '九月', '十月', '十一月', '十二月'
+        ],
+        weekdayNames: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+        timeLabels: {
+          hours: '小时',
+          minutes: '分钟',
+          seconds: '秒',
+          tens: '十位',
+          units: '分钟'
+        }
+      },
+      // Hindi
+      'hi': {
+        monthNames: [
+          'जनवरी', 'फरवरी', 'मार्च', 'अप्रैल', 'मई', 'जून',
+          'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'
+        ],
+        monthAbbreviations: [
+          'जन', 'फर', 'मार्च', 'अप्रै', 'मई', 'जून',
+          'जुल', 'अग', 'सित', 'अक्टू', 'नव', 'दिस'
+        ],
+        weekdayNames: ['सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि', 'रवि'],
+        timeLabels: {
+          hours: 'घंटे',
+          minutes: 'मिनट',
+          seconds: 'सेकंड',
+          tens: 'दहाई',
+          units: 'मिनट'
+        }
+      }
+    };
+  }
+
+  /**
+   * Gets translation for a specific key
+   * @param {string} key - Translation key
+   * @returns {string} Translated text
+   */
+  getTranslation(key) {
+    const lang = this.getLanguage();
+    const sections = key.split('.');
+    
+    let result = this.translations[lang];
+    for (const section of sections) {
+      if (result && result[section]) {
+        result = result[section];
+      } else {
+        // Fallback to English if translation not found
+        let fallback = this.translations['en'];
+        for (const fbSection of sections) {
+          if (fallback && fallback[fbSection]) {
+            fallback = fallback[fbSection];
+          } else {
+            return key; // Return the key if translation not found even in English
+          }
+        }
+        return fallback;
+      }
+    }
+    
+    return result;
   }
 
   /**
@@ -137,7 +421,7 @@ class DateTimePicker {
     const hoursSection = document.createElement('div');
     hoursSection.className = 'time-section';
     hoursSection.innerHTML = `
-      <div class="time-title">Hours</div>
+      <div class="time-title">${this.getTranslation('timeLabels.hours')}</div>
       <div class="time-grid hours-grid" id="hoursGrid"></div>
     `;
 
@@ -145,11 +429,11 @@ class DateTimePicker {
     const minutesSection = document.createElement('div');
     minutesSection.className = 'time-section';
     minutesSection.innerHTML = `
-      <div class="time-title">Minutes</div>
+      <div class="time-title">${this.getTranslation('timeLabels.minutes')}</div>
       <div class="time-section-container">
-        <div class="time-title" style="font-size: 12px; margin-top: 8px;">Tens</div>
+        <div class="time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.tens')}</div>
         <div class="time-grid ten-minutes-grid" id="tenMinutesGrid"></div>
-        <div class="time-title" style="font-size: 12px; margin-top: 8px;">Minutes</div>
+        <div class="time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.units')}</div>
         <div class="time-grid minutes-grid" id="minutesGrid"></div>
       </div>
     `;
@@ -158,7 +442,7 @@ class DateTimePicker {
     const secondsSection = document.createElement('div');
     secondsSection.className = 'time-section';
     secondsSection.innerHTML = `
-      <div class="time-title">Seconds</div>
+      <div class="time-title">${this.getTranslation('timeLabels.seconds')}</div>
       <div class="time-grid seconds-grid" id="secondsGrid"></div>
     `;
 
@@ -848,9 +1132,8 @@ class DateTimePicker {
     // Clear calendar
     this.elements.calendarGrid.innerHTML = '';
 
-    // Add weekdays
-    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    weekdays.forEach(day => {
+    // Add weekdays using localized names
+    this.weekdayNames.forEach(day => {
       const dayElement = document.createElement('div');
       dayElement.className = 'weekday';
       dayElement.textContent = day;
@@ -1637,6 +1920,8 @@ class DateTimePicker {
    * @param {Object} config - New configuration parameters
    */
   setConfig(config) {
+    let languageChanged = false;
+    
     if (config.showTime !== undefined) {
       this.config.showTime = config.showTime;
     }
@@ -1656,10 +1941,40 @@ class DateTimePicker {
     if (config.dateFormat !== undefined) {
       this.config.dateFormat = config.dateFormat;
     }
-
+    
+    if (config.language !== undefined) {
+      // Check if language has actually changed
+      if (this.config.language !== config.language) {
+        this.config.language = config.language;
+        languageChanged = true;
+      }
+    }
+    
     // Apply new configuration
     this.applyConfig();
-    this.renderMinutes();
+    
+    // If language has changed, update translations and re-render everything
+    if (languageChanged) {
+      const lang = this.getLanguage();
+      this.monthNames = this.translations[lang].monthNames;
+      this.monthAbbreviations = this.translations[lang].monthAbbreviations;
+      this.weekdayNames = this.translations[lang].weekdayNames;
+      
+      // Recreate all elements with new translations
+      this.container.innerHTML = '';
+      this.createElements();
+      this.findElements();
+      this.renderCalendarDays();
+      this.renderHours();
+      this.renderTenMinutes();
+      this.renderMinutes();
+      this.renderSeconds();
+      this.bindEvents();
+    } else {
+      // Otherwise just update minutes rendering
+      this.renderMinutes();
+    }
+    
     this.updateDateInput();
   }
 }

@@ -34,6 +34,22 @@
         <option value="ja-JP">Japanese (YYYY-MM-DD)</option>
       </select>
     </div>
+    <div class="config-item">
+      <label for="languageSelect">Language:</label>
+      <select id="languageSelect">
+        <option value="en">English</option>
+        <option value="de">German (Deutsch)</option>
+        <option value="fr">French (Français)</option>
+        <option value="es">Spanish (Español)</option>
+        <option value="ru">Russian (Русский)</option>
+        <option value="uk">Ukrainian (Українська)</option>
+        <option value="sr">Serbian (Srpski)</option>
+        <option value="tr">Turkish (Türkçe)</option>
+        <option value="ar">Arabic (العربية)</option>
+        <option value="zh">Chinese (中文)</option>
+        <option value="hi">Hindi (हिन्दी)</option>
+      </select>
+    </div>
   </div>
   
   <div id="calendarContainer"></div>
@@ -59,12 +75,14 @@
       const minuteStepSelect = document.getElementById('minuteStepSelect');
       const showSecondsCheckbox = document.getElementById('showSecondsCheckbox');
       const dateFormatSelect = document.getElementById('dateFormatSelect');
+      const languageSelect = document.getElementById('languageSelect');
 
       // Set initial values
       showTimeCheckbox.checked = picker.config.showTime;
       minuteStepSelect.value = picker.config.minuteStep.toString();
       showSecondsCheckbox.checked = picker.config.showSeconds;
       dateFormatSelect.value = picker.config.dateFormat || '';
+      languageSelect.value = picker.config.language || 'en';
 
       // Add event listeners
       showTimeCheckbox.addEventListener('change', (e) => {
@@ -88,6 +106,12 @@
       dateFormatSelect.addEventListener('change', (e) => {
         picker.setConfig({
           dateFormat: e.target.value || null // If empty string, use null to use default format
+        });
+      });
+      
+      languageSelect.addEventListener('change', (e) => {
+        picker.setConfig({
+          language: e.target.value
         });
       });
     });
