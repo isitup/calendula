@@ -634,8 +634,17 @@ class DateTimePicker {
       setTimeout(() => this.showDatePicker(), 0); // Delay to ensure the DOM is ready
     });
 
-    // Handle key presses for digit overwrite
+    // Handle key presses for digit overwrite on desktop
     this.elements.dateInput.addEventListener('keydown', this.handleKeyDown.bind(this));
+
+    // Handle input event for mobile devices and as a fallback
+    this.elements.dateInput.addEventListener('input', (e) => {
+      // On mobile, especially Android, the input event will fire when text is entered
+      if (this.isMobileDevice()) {
+        // On mobile, handle input differently
+        this.handleMobileInput(e);
+      }
+    });
 
     // Handle keyup events for cursor tracking and Enter key
     this.elements.dateInput.addEventListener('keyup', (e) => {
@@ -696,6 +705,142 @@ class DateTimePicker {
         this.updateDatePickerPosition();
       }
     });
+  }
+
+  /**
+   * Detects if the user is on a mobile device
+   * @returns {boolean} True if on mobile device
+   */
+  isMobileDevice() {
+    // Check for touch capability (most reliable way to detect mobile devices)
+    const hasTouchScreen = (
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      navigator.msMaxTouchPoints > 0
+    );
+    
+    // Check for small screen size (max-width: 540px)
+    const hasSmallScreen = window.matchMedia('(max-width: 540px)').matches;
+    
+    // Check for mobile user agent (less reliable but still useful)
+    const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Return true if any of the above conditions are met
+    return hasTouchScreen || (hasSmallScreen && mobileUserAgent);
+  }
+
+  /**
+   * Handles input events for mobile devices
+   * @param {Event} e - Input event
+   */
+  handleMobileInput(e) {
+    const input = this.elements.dateInput;
+    const value = input.value;
+    const cursorPos = input.selectionStart;
+    
+    // Get only the digits from the input value
+    const digits = value.replace(/\D/g, '');
+    
+    // If there are no digits, reset to default
+    if (digits.length === 0) {
+      this.updateDateInput();
+      return;
+    }
+    
+    // Create template format based on configuration
+    let template = 'DD.MM.YYYY';
+    if (this.config.showTime) {
+      template += ' HH:MM';
+      if (this.config.showSeconds) {
+        template += ':SS';
+      }
+    }
+    
+    // Format the date string based on entered digits
+    let formattedValue = '';
+    let digitIndex = 0;
+    
+    // Create a properly formatted template
+    let day = '00', month = '00', year = '0000';
+    let hours = '00', minutes = '00', seconds = '00';
+    
+    // Apply digits to template slots
+    if (digits.length >= 1) day = (digits[0] + '0').substring(0, 2);
+    if (digits.length >= 2) day = digits.substring(0, 2);
+    if (digits.length >= 3) month = (digits.substring(2, 3) + '0').substring(0, 2);
+    if (digits.length >= 4) month = digits.substring(2, 4);
+    if (digits.length >= 5) year = (digits.substring(4, 8) + '0000').substring(0, 4);
+    
+    // Handle time components if needed
+    if (this.config.showTime) {
+      if (digits.length >= 9) hours = (digits.substring(8, 10) + '00').substring(0, 2);
+      if (digits.length >= 11) minutes = (digits.substring(10, 12) + '00').substring(0, 2);
+      
+      if (this.config.showSeconds && digits.length >= 13) {
+        seconds = (digits.substring(12, 14) + '00').substring(0, 2);
+      }
+    }
+    
+    // Build the formatted date string
+    formattedValue = `${day}.${month}.${year}`;
+    if (this.config.showTime) {
+      formattedValue += ` ${hours}:${minutes}`;
+      if (this.config.showSeconds) {
+        formattedValue += `:${seconds}`;
+      }
+    }
+    
+    // Update the input value
+    input.value = formattedValue;
+    
+    // Update the calendar with the new date
+    this.handleInputChange(false);
+    
+    // Calculate new cursor position
+    const newCursorPos = this.calculateNewCursorPosition(digits.length, this.config.showTime, this.config.showSeconds);
+    
+    // Restore cursor position
+    setTimeout(() => {
+      input.selectionStart = newCursorPos;
+      input.selectionEnd = newCursorPos;
+      this.state.cursorPosition = newCursorPos;
+    }, 0);
+  }
+  
+  /**
+   * Calculate cursor position after mobile input
+   * @param {number} digitCount - Number of digits entered
+   * @param {boolean} showTime - Whether time is displayed
+   * @param {boolean} showSeconds - Whether seconds are displayed
+   * @returns {number} New cursor position
+   */
+  calculateNewCursorPosition(digitCount, showTime, showSeconds) {
+    // Positions based on DD.MM.YYYY HH:MM:SS format
+    const posMap = {
+      1: 1,  // After first digit of day
+      2: 3,  // After dot following day
+      3: 4,  // After first digit of month
+      4: 6,  // After dot following month
+      5: 7,  // After first digit of year
+      6: 8,  // After second digit of year
+      7: 9,  // After third digit of year
+      8: 10, // After fourth digit of year
+    };
+    
+    if (showTime) {
+      posMap[9] = 12;  // After first digit of hour
+      posMap[10] = 13; // After second digit of hour
+      posMap[11] = 15; // After first digit of minute
+      posMap[12] = 16; // After second digit of minute
+      
+      if (showSeconds) {
+        posMap[13] = 18; // After first digit of second
+        posMap[14] = 19; // After second digit of second
+      }
+    }
+    
+    // Get the position based on digit count
+    return posMap[Math.min(digitCount, Object.keys(posMap).length)] || 0;
   }
 
   /**
@@ -949,7 +1094,7 @@ class DateTimePicker {
     this.renderCalendarDays();
     
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
     
     // Update month in the input field
     const monthString = (month + 1).toString().padStart(2, '0');
@@ -977,7 +1122,7 @@ class DateTimePicker {
     this.renderCalendarDays();
     
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
     
     // Update year in the input field
     const yearString = year.toString();
@@ -1005,7 +1150,7 @@ class DateTimePicker {
     this.renderCalendarDays();
 
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
 
     // Update month in the input field
     const month = (this.state.currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -1216,7 +1361,7 @@ class DateTimePicker {
     this.renderCalendarDays();
 
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
 
     // Update day in the input field without focusing if on mobile
     const dayString = day.toString().padStart(2, '0');
@@ -1277,7 +1422,7 @@ class DateTimePicker {
     this.renderHours();
 
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
 
     // Update hours in the input field
     const hourString = hour.toString().padStart(2, '0');
@@ -1335,7 +1480,7 @@ class DateTimePicker {
     this.renderTenMinutes();
 
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
 
     // Update minutes in the input field
     const minuteString = (minute + this.state.selectedMinute).toString().padStart(2, '0');
@@ -1410,7 +1555,7 @@ class DateTimePicker {
    */
   selectMinute(minute) {
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
     
     if (this.config.minuteStep === 1) {
       // Standard mode - store tens and units separately
@@ -1497,7 +1642,7 @@ class DateTimePicker {
     this.renderSeconds();
 
     // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 540px)').matches;
+    const isMobile = this.isMobileDevice();
 
     // Update seconds in the input field
     const secondString = second.toString().padStart(2, '0');
