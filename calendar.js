@@ -1768,7 +1768,7 @@ class DateTimePicker {
     // We use setTimeout to ensure this runs after the browser's default handling
     setTimeout(() => {
       input.setSelectionRange(newPosition, newPosition);
-    }, 0);
+    }, 50);
   }
 
   /**
