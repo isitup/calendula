@@ -1755,12 +1755,20 @@ class DateTimePicker {
     // Update calendar based on new value
     this.handleInputChange(false);
     
-    // Update cursor position in state but don't focus the input
+    // Calculate new cursor position
     const newPosition = startPosition + newValue.length +
                       (currentValue[startPosition + 1] === '.' ||
                       currentValue[startPosition + 1] === ':' ||
                       currentValue[startPosition + 1] === ' ' ? 1 : 0);
+    
+    // Update state cursor position
     this.state.cursorPosition = newPosition;
+    
+    // Restore cursor position without focusing
+    // We use setTimeout to ensure this runs after the browser's default handling
+    setTimeout(() => {
+      input.setSelectionRange(newPosition, newPosition);
+    }, 0);
   }
 
   /**
