@@ -5,6 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Date and Time Picker</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    /* Config panel styles */
+    .config-panel {
+      max-width: 550px;
+      margin: 0 auto 15px;
+      padding: 12px 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .config-item {
+      margin: 5px 10px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .config-item label {
+      margin-right: 8px;
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .config-item select {
+      padding: 5px 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background-color: #fff;
+      font-size: 14px;
+    }
+    
+    .config-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    @media (max-width: 540px) {
+      .config-panel {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .config-item {
+        margin: 5px 0;
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="config-panel">

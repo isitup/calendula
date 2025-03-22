@@ -371,79 +371,83 @@ class DateTimePicker {
   createElements() {
     // Create container for input field
     const inputContainer = document.createElement('div');
-    inputContainer.className = 'input-container';
+    inputContainer.className = 'calendula-input-container';
 
     // Create date input field (if not provided externally)
     if (!this.config.inputField) {
       this.dateInput = document.createElement('input');
       this.dateInput.type = 'text';
-      this.dateInput.className = 'date-input';
+      this.dateInput.className = 'calendula-date-input';
       this.dateInput.placeholder = 'DD.MM.YYYY HH:MM:SS';
       inputContainer.appendChild(this.dateInput);
     } else {
       this.dateInput = this.config.inputField;
+      // Add class to external input for styling consistency
+      if (!this.dateInput.classList.contains('calendula-date-input')) {
+        this.dateInput.classList.add('calendula-date-input');
+      }
     }
 
     // Main calendar container
     const dateTimePicker = document.createElement('div');
-    dateTimePicker.className = 'date-time-picker';
+    dateTimePicker.className = 'calendula-date-time-picker';
 
     // Container for calendar
     const calendarContainer = document.createElement('div');
-    calendarContainer.className = 'calendar-container';
+    calendarContainer.className = 'calendula-calendar-container';
 
     // Calendar header with month navigation
     const calendarHeader = document.createElement('div');
-    calendarHeader.className = 'calendar-header';
+    calendarHeader.className = 'calendula-calendar-header';
     calendarHeader.innerHTML = `
-      <div class="month-nav">
+      <div class="calendula-month-nav">
         <button id="prevMonth">&lt;</button>
-        <div class="month-year-selector">
-          <span class="month-title" id="monthTitle"></span>
-          <span class="year-title" id="yearTitle"></span>
+        <div class="calendula-month-year-selector">
+          <span class="calendula-month-title" id="monthTitle"></span>
+          <span class="calendula-year-title" id="yearTitle"></span>
         </div>
         <button id="nextMonth">&gt;</button>
       </div>
-      <div class="month-selector" id="monthSelector" style="display: none;"></div>
-      <div class="year-selector" id="yearSelector" style="display: none;"></div>
+      <div class="calendula-month-selector" id="monthSelector" style="display: none;"></div>
+      <div class="calendula-year-selector" id="yearSelector" style="display: none;"></div>
     `;
 
     // Grid for calendar days
     const calendarGrid = document.createElement('div');
-    calendarGrid.className = 'calendar-grid';
+    calendarGrid.className = 'calendula-calendar-grid';
     calendarGrid.id = 'calendarGrid';
 
     // Container for time
     const timeContainer = document.createElement('div');
-    timeContainer.className = 'time-container';
+    timeContainer.className = 'calendula-time-container';
 
     // Hours section
     const hoursSection = document.createElement('div');
-    hoursSection.className = 'time-section';
+    hoursSection.className = 'calendula-time-section';
     hoursSection.innerHTML = `
-      <div class="time-title">${this.getTranslation('timeLabels.hours')}</div>
-      <div class="time-grid hours-grid" id="hoursGrid"></div>
+      <div class="calendula-time-title">${this.getTranslation('timeLabels.hours')}</div>
+      <div class="calendula-time-grid calendula-hours-grid" id="hoursGrid"></div>
     `;
 
     // Minutes section
     const minutesSection = document.createElement('div');
-    minutesSection.className = 'time-section';
+      minutesSection.className = 'calendula-time-section';
     minutesSection.innerHTML = `
-      <div class="time-title">${this.getTranslation('timeLabels.minutes')}</div>
-      <div class="time-section-container">
-        <div class="time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.tens')}</div>
-        <div class="time-grid ten-minutes-grid" id="tenMinutesGrid"></div>
-        <div class="time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.units')}</div>
-        <div class="time-grid minutes-grid" id="minutesGrid"></div>
+      <div class="calendula-time-title">${this.getTranslation('timeLabels.minutes')}</div>
+      <div class="calendula-time-section-container">
+        <div class="calendula-time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.tens')}</div>
+        <div class="calendula-time-grid calendula-ten-minutes-grid" id="tenMinutesGrid"></div>
+        <div class="calendula-time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.units')}</div>
+        <div class="calendula-time-grid calendula-minutes-grid" id="minutesGrid"></div>
       </div>
     `;
 
     // Seconds section
     const secondsSection = document.createElement('div');
-    secondsSection.className = 'time-section';
+    secondsSection.className = 'calendula-time-section';
     secondsSection.innerHTML = `
-      <div class="time-title">${this.getTranslation('timeLabels.seconds')}</div>
-      <div class="time-grid seconds-grid" id="secondsGrid"></div>
+      <div class="calendula-time-title">${this.getTranslation('timeLabels.seconds')}</div>
+      <div class="calendula-time-grid calendula-seconds-grid" id="secondsGrid"></div>
     `;
 
     // Assemble DOM structure
@@ -459,7 +463,7 @@ class DateTimePicker {
 
     // Create a wrapper div to hold both the input and the dropdown
     const pickerWrapper = document.createElement('div');
-    pickerWrapper.className = 'date-picker-wrapper';
+    pickerWrapper.className = 'calendula-date-picker-wrapper';
     
     // If using external input field, reference it, otherwise append our input
     if (!this.config.inputField) {
@@ -472,7 +476,7 @@ class DateTimePicker {
       if (inputParent) {
         // Add a small wrapper div around the external input to maintain relative positioning
         const inputWrapper = document.createElement('div');
-        inputWrapper.className = 'date-input-wrapper';
+        inputWrapper.className = 'calendula-date-input-wrapper';
         inputWrapper.style.position = 'relative';
         
         // Replace the input with the wrapper containing the input
@@ -525,13 +529,13 @@ class DateTimePicker {
    */
   applyConfig() {
     // Manage time container visibility
-    const timeContainer = this.datePickerElement.querySelector('.time-container');
+    const timeContainer = this.datePickerElement.querySelector('.calendula-time-container');
     if (timeContainer) {
       timeContainer.style.display = this.config.showTime ? 'block' : 'none';
     }
 
     // Manage seconds visibility
-    const secondsSection = this.datePickerElement.querySelector('.time-section:last-child');
+    const secondsSection = this.datePickerElement.querySelector('.calendula-time-section:last-child');
     if (secondsSection) {
       secondsSection.style.display = this.config.showSeconds ? 'block' : 'none';
     }
@@ -540,15 +544,15 @@ class DateTimePicker {
     const minuteStep = this.config.minuteStep;
 
     // Find minute elements
-    const minutesSection = this.datePickerElement.querySelector('.time-section:nth-child(2)');
+    const minutesSection = this.datePickerElement.querySelector('.calendula-time-section:nth-child(2)');
     if (!minutesSection) return;
 
-    const minuteSectionContainer = minutesSection.querySelector('.time-section-container');
+    const minuteSectionContainer = minutesSection.querySelector('.calendula-time-section-container');
     if (!minuteSectionContainer) return;
 
-    const minutesTitle = minutesSection.querySelector('.time-title');
-    const tenMinutesTitle = minuteSectionContainer.querySelector('.time-title:nth-child(1)');
-    const minutesSubtitle = minuteSectionContainer.querySelector('.time-title:nth-child(3)');
+    const minutesTitle = minutesSection.querySelector('.calendula-time-title');
+    const tenMinutesTitle = minuteSectionContainer.querySelector('.calendula-time-title:nth-child(1)');
+    const minutesSubtitle = minuteSectionContainer.querySelector('.calendula-time-title:nth-child(3)');
 
     const tenMinutesGrid = this.elements.tenMinutesGrid;
     const minutesGrid = this.elements.minutesGrid;
@@ -846,7 +850,7 @@ class DateTimePicker {
     // Add month buttons using abbreviated names
     this.monthAbbreviations.forEach((monthAbbr, index) => {
       const monthElement = document.createElement('div');
-      monthElement.className = 'month-item';
+      monthElement.className = 'calendula-month-item';
       monthElement.textContent = monthAbbr;
       
       // Store full month name for accessibility
@@ -854,7 +858,7 @@ class DateTimePicker {
       
       // Highlight the current month
       if (index === this.state.currentDate.getMonth()) {
-        monthElement.classList.add('selected');
+        monthElement.classList.add('calendula-selected');
       }
       
       // Add click handler
@@ -900,12 +904,12 @@ class DateTimePicker {
     // Add year buttons
     for (let year = startYear; year <= endYear; year++) {
       const yearElement = document.createElement('div');
-      yearElement.className = 'year-item';
+      yearElement.className = 'calendula-year-item';
       yearElement.textContent = year;
       
       // Highlight the current year
       if (year === currentYear) {
-        yearElement.classList.add('selected');
+        yearElement.classList.add('calendula-selected');
         
         // Scroll to the selected year
         setTimeout(() => {
@@ -1135,7 +1139,7 @@ class DateTimePicker {
     // Add weekdays using localized names
     this.weekdayNames.forEach(day => {
       const dayElement = document.createElement('div');
-      dayElement.className = 'weekday';
+      dayElement.className = 'calendula-weekday';
       dayElement.textContent = day;
       this.elements.calendarGrid.appendChild(dayElement);
     });
@@ -1157,7 +1161,7 @@ class DateTimePicker {
     // Add empty cells for days from the previous month
     for (let i = 0; i < firstDayOfWeek; i++) {
       const emptyDay = document.createElement('div');
-      emptyDay.className = 'calendar-day empty-day';
+      emptyDay.className = 'calendula-calendar-day calendula-empty-day';
       this.elements.calendarGrid.appendChild(emptyDay);
     }
 
@@ -1165,21 +1169,21 @@ class DateTimePicker {
     const today = new Date();
     for (let day = 1; day <= daysInMonth; day++) {
       const dayElement = document.createElement('div');
-      dayElement.className = 'calendar-day';
+      dayElement.className = 'calendula-calendar-day';
       dayElement.textContent = day;
 
       // Highlight today
       if (day === today.getDate() &&
           month === today.getMonth() &&
           year === today.getFullYear()) {
-        dayElement.classList.add('today');
+        dayElement.classList.add('calendula-today');
       }
 
       // Highlight selected day
       if (day === this.state.selectedDate.getDate() &&
           month === this.state.selectedDate.getMonth() &&
           year === this.state.selectedDate.getFullYear()) {
-        dayElement.classList.add('selected');
+        dayElement.classList.add('calendula-selected');
       }
 
       // Click handler
@@ -1244,11 +1248,11 @@ class DateTimePicker {
     // Create buttons for hours (0-23)
     for (let hour = 0; hour < 24; hour++) {
       const hourElement = document.createElement('div');
-      hourElement.className = 'time-item';
+      hourElement.className = 'calendula-time-item';
       hourElement.textContent = hour.toString().padStart(2, '0');
 
       if (hour === this.state.selectedHour) {
-        hourElement.classList.add('selected');
+        hourElement.classList.add('calendula-selected');
       }
 
       hourElement.addEventListener('click', () => {
@@ -1302,11 +1306,11 @@ class DateTimePicker {
 
     tenMinutes.forEach(minute => {
       const minuteElement = document.createElement('div');
-      minuteElement.className = 'time-item';
+      minuteElement.className = 'calendula-time-item';
       minuteElement.textContent = minute.toString().padStart(2, '0');
 
       if (minute === this.state.selectedTenMinute) {
-        minuteElement.classList.add('selected');
+        minuteElement.classList.add('calendula-selected');
       }
 
       minuteElement.addEventListener('click', () => {
@@ -1359,11 +1363,11 @@ class DateTimePicker {
       // Standard mode - create buttons for minute units (0-9)
       for (let minute = 0; minute < 10; minute++) {
         const minuteElement = document.createElement('div');
-        minuteElement.className = 'time-item';
+        minuteElement.className = 'calendula-time-item';
         minuteElement.textContent = minute.toString();
 
         if (minute === this.state.selectedMinute) {
-          minuteElement.classList.add('selected');
+          minuteElement.classList.add('calendula-selected');
         }
 
         minuteElement.addEventListener('click', () => {
@@ -1382,13 +1386,13 @@ class DateTimePicker {
 
       for (let minute = 0; minute <= maxMinutes; minute += step) {
         const minuteElement = document.createElement('div');
-        minuteElement.className = 'time-item';
+        minuteElement.className = 'calendula-time-item';
         minuteElement.textContent = minute.toString().padStart(2, '0');
 
         // Check if this minute button should be selected
         const isSelected = minute <= currentMinutes && currentMinutes < minute + step;
         if (isSelected) {
-          minuteElement.classList.add('selected');
+          minuteElement.classList.add('calendula-selected');
         }
 
         minuteElement.addEventListener('click', () => {
@@ -1464,11 +1468,11 @@ class DateTimePicker {
     // Create buttons for seconds (0-59, with step 5)
     for (let second = 0; second < 60; second += 5) {
       const secondElement = document.createElement('div');
-      secondElement.className = 'time-item';
+      secondElement.className = 'calendula-time-item';
       secondElement.textContent = second.toString().padStart(2, '0');
 
       if (second <= this.state.selectedSecond && this.state.selectedSecond < second + 5) {
-        secondElement.classList.add('selected');
+        secondElement.classList.add('calendula-selected');
       }
 
       secondElement.addEventListener('click', () => {
