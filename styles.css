@@ -102,12 +102,51 @@
   border: none;
   cursor: pointer;
   font-size: 18px;
-  padding: 4px 8px;
+  padding: 8px;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
 }
 
 .calendula-month-nav button:hover {
   background-color: #f0f0f0;
+}
+
+/* Navigation arrow styling */
+.calendula-nav-arrow {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  position: relative;
+}
+
+/* Left arrow */
+.calendula-arrow-left:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-left: 2px solid #666;
+  border-bottom: 2px solid #666;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Right arrow */
+.calendula-arrow-right:before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #666;
+  border-top: 2px solid #666;
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .calendula-month-year-selector {
