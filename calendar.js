@@ -15,16 +15,24 @@
 class Calendula {
   /**
    * Creates an instance of Calendula
-   * @param {string|HTMLElement} container - Selector or DOM element of the container
+   * @param {string|HTMLElement} inputElement - Selector or DOM element of the input field
    * @param {Object} options - Configuration options
    */
-  constructor(container, options = {}) {
-    this.container = typeof container === 'string'
-      ? document.querySelector(container)
-      : container;
+  constructor(inputElement, options = {}) {
+    // Get the input element
+    const input = typeof inputElement === 'string'
+      ? document.querySelector(inputElement)
+      : inputElement;
 
+    if (!input || !(input instanceof HTMLInputElement)) {
+      throw new Error('Calendula: Input element not found or not an input element');
+    }
+
+    // Set the input as the inputField and its parent as the container
+    this.container = input.parentNode;
+    
     if (!this.container) {
-      throw new Error('Calendula: Container not found');
+      throw new Error('Calendula: Input element must have a parent node');
     }
 
     // Load translations from external file
@@ -36,7 +44,7 @@ class Calendula {
       showSeconds: options.showSeconds !== undefined ? options.showSeconds : true,
       minuteStep: options.minuteStep || 1,
       initialDate: options.initialDate || new Date(),
-      inputField: options.inputField || null,
+      inputField: input, // Use the provided input element directly
       onChange: options.onChange || null,
       dateFormat: options.dateFormat || null, // Date format (for example, 'dd.MM.yyyy')
       language: options.language || this.detectBrowserLanguage() // Interface language
@@ -161,23 +169,12 @@ class Calendula {
    * Creates the calendar DOM structure
    */
   createElements() {
-    // Create container for input field
-    const inputContainer = document.createElement('div');
-    inputContainer.className = 'calendula-input-container';
-
-    // Create date input field (if not provided externally)
-    if (!this.config.inputField) {
-      this.dateInput = document.createElement('input');
-      this.dateInput.type = 'text';
-      this.dateInput.className = 'calendula-date-input';
-      this.dateInput.placeholder = 'DD.MM.YYYY HH:MM:SS';
-      inputContainer.appendChild(this.dateInput);
-    } else {
-      this.dateInput = this.config.inputField;
-      // Add class to external input for styling consistency
-      if (!this.dateInput.classList.contains('calendula-date-input')) {
-        this.dateInput.classList.add('calendula-date-input');
-      }
+    // Since we're always working with an existing input, set dateInput
+    this.dateInput = this.config.inputField;
+    
+    // Add class to input for styling consistency
+    if (!this.dateInput.classList.contains('calendula-date-input')) {
+      this.dateInput.classList.add('calendula-date-input');
     }
 
     // Main calendar container
@@ -252,40 +249,24 @@ class Calendula {
     dateTimePicker.appendChild(calendarContainer);
     dateTimePicker.appendChild(timeContainer);
 
-    // Create a wrapper div to hold both the input and the dropdown
+    // Create a wrapper div for positioning the date picker
     const pickerWrapper = document.createElement('div');
     pickerWrapper.className = 'calendula-date-picker-wrapper';
     
-    // If using external input field, reference it, otherwise append our input
-    if (!this.config.inputField) {
-      pickerWrapper.appendChild(inputContainer);
-    } else {
-      // If external input field is provided, we need to position our dropdown near it
-      const inputParent = this.config.inputField.parentNode;
-      
-      // Insert wrapper after the input field
-      if (inputParent) {
-        // Add a small wrapper div around the external input to maintain relative positioning
-        const inputWrapper = document.createElement('div');
-        inputWrapper.className = 'calendula-date-input-wrapper';
-        inputWrapper.style.position = 'relative';
-        
-        // Replace the input with the wrapper containing the input
-        inputParent.insertBefore(inputWrapper, this.config.inputField);
-        inputWrapper.appendChild(this.config.inputField);
-        
-        // Append the picker wrapper after the input wrapper
-        inputWrapper.appendChild(pickerWrapper);
-      }
-    }
+    // Create a wrapper around the input element to maintain relative positioning
+    const inputWrapper = document.createElement('div');
+    inputWrapper.className = 'calendula-date-input-wrapper';
+    inputWrapper.style.position = 'relative';
+    
+    // Replace the input with the wrapper containing the input
+    this.container.insertBefore(inputWrapper, this.dateInput);
+    inputWrapper.appendChild(this.dateInput);
+    
+    // Append the picker wrapper to the input wrapper
+    inputWrapper.appendChild(pickerWrapper);
     
     // Append the date picker to the wrapper
     pickerWrapper.appendChild(dateTimePicker);
-    
-    // Add the wrapper to the container if we're not using an external input
-    if (!this.config.inputField) {
-      this.container.appendChild(pickerWrapper);
-    }
     
     // Always ensure the date picker is initially hidden
     dateTimePicker.style.display = 'none';
@@ -293,6 +274,7 @@ class Calendula {
     // Save references to created elements
     this.datePickerElement = dateTimePicker;
     this.pickerWrapper = pickerWrapper;
+    this.inputWrapper = inputWrapper;
   }
 
   /**
@@ -301,17 +283,17 @@ class Calendula {
   findElements() {
     this.elements = {
       dateInput: this.dateInput,
-      monthTitle: this.container.querySelector('.calendula-month-title'),
-      yearTitle: this.container.querySelector('.calendula-year-title'),
-      prevMonthBtn: this.container.querySelector('.calendula-prev-month'),
-      nextMonthBtn: this.container.querySelector('.calendula-next-month'),
-      calendarGrid: this.container.querySelector('.calendula-calendar-grid'),
-      monthSelector: this.container.querySelector('.calendula-month-selector'),
-      yearSelector: this.container.querySelector('.calendula-year-selector'),
-      hoursGrid: this.container.querySelector('.calendula-hours-grid'),
-      tenMinutesGrid: this.container.querySelector('.calendula-ten-minutes-grid'),
-      minutesGrid: this.container.querySelector('.calendula-minutes-grid'),
-      secondsGrid: this.container.querySelector('.calendula-seconds-grid')
+      monthTitle: this.inputWrapper.querySelector('.calendula-month-title'),
+      yearTitle: this.inputWrapper.querySelector('.calendula-year-title'),
+      prevMonthBtn: this.inputWrapper.querySelector('.calendula-prev-month'),
+      nextMonthBtn: this.inputWrapper.querySelector('.calendula-next-month'),
+      calendarGrid: this.inputWrapper.querySelector('.calendula-calendar-grid'),
+      monthSelector: this.inputWrapper.querySelector('.calendula-month-selector'),
+      yearSelector: this.inputWrapper.querySelector('.calendula-year-selector'),
+      hoursGrid: this.inputWrapper.querySelector('.calendula-hours-grid'),
+      tenMinutesGrid: this.inputWrapper.querySelector('.calendula-ten-minutes-grid'),
+      minutesGrid: this.inputWrapper.querySelector('.calendula-minutes-grid'),
+      secondsGrid: this.inputWrapper.querySelector('.calendula-seconds-grid')
     };
   }
 

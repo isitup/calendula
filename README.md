@@ -41,9 +41,9 @@ import { Calendula } from 'calendular';
 // Also import the styles
 import 'calendular/styles.css';
 
-// Initialize the component
+// Initialize the component on an input element
 document.addEventListener('DOMContentLoaded', function() {
-  const picker = new Calendula('#calendarContainer', {
+  const picker = new Calendula('#myDateInput', {
     showTime: true,
     language: 'en'
   });
@@ -59,14 +59,27 @@ document.addEventListener('DOMContentLoaded', function() {
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="calendarContainer"></div>
+  <form>
+    <label for="birthdate">Date of Birth:</label>
+    <input type="text" id="birthdate" name="birthdate" placeholder="DD.MM.YYYY">
+    
+    <label for="appointment">Appointment:</label>
+    <input type="text" id="appointment" name="appointment" class="date-input" placeholder="DD.MM.YYYY HH:MM">
+  </form>
   
   <script src="translations.js"></script>
   <script src="calendar.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const picker = new Calendula('#calendarContainer', {
-        showTime: true
+      // Initialize date picker on first input (date only)
+      const datePicker = new Calendula('#birthdate', {
+        showTime: false
+      });
+      
+      // Initialize date picker on second input (date and time)
+      const dateTimePicker = new Calendula(document.getElementById('appointment'), {
+        showTime: true,
+        minuteStep: 5
       });
     });
   </script>
@@ -79,7 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
 The component accepts the following options:
 
 ```javascript
-const picker = new Calendula('#calendarContainer', {
+// Pass an input element selector or DOM element as the first parameter
+const picker = new Calendula('#dateInput', {
   // Show time picker (default: false)
   showTime: true,
   
@@ -91,9 +105,6 @@ const picker = new Calendula('#calendarContainer', {
   
   // Initial date to display (default: current date)
   initialDate: new Date(),
-  
-  // Optional input field to update
-  inputField: document.getElementById('dateInput'),
   
   // Callback when date changes
   onChange: function(date) {

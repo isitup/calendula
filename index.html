@@ -14,27 +14,50 @@
     }
     
     body {
-      padding: 0 20px 20px 20px;
+      padding: 20px;
       background-color: #f5f5f5;
     }
 
-    /* Header */
-    .header {
-      max-width: 550px;
-      margin: 0 auto 15px;
-      padding-top: 20px;
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    /* Field */
-    .field {
-      max-width: 550px;
-      margin: 0 auto 30px;
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
     }
 
     /* Config panel styles */
     .config-panel {
-      max-width: 550px;
-      margin: 0 auto 15px;
+      width: 100%;
+      margin: 20px 0;
       padding: 12px 15px;
       background-color: #f8f9fa;
       border-radius: 8px;
@@ -85,9 +108,12 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <h2>Configurable</h2>
-  </div>
+
+<div class="container">
+  <h1>Calendula Demo</h1>
+
+  <h2>Configurable field</h2>
+
   <div class="config-panel">
     <div class="config-item">
       <label for="showTimeCheckbox">Show Time:</label>
@@ -110,52 +136,58 @@
       <select id="dateFormatSelect">
         <option value="">Default (DD.MM.YYYY)</option>
         <option value="en-US">US (MM/DD/YYYY)</option>
-        <option value="en-GB">UK (DD/MM/YYYY)</option>
-        <option value="ru-RU">Russian (DD.MM.YYYY)</option>
-        <option value="ja-JP">Japanese (YYYY-MM-DD)</option>
+        <option value="en-GB">UK (MM/DD/YYYY)</option>
+        <option value="ru-RU">Russian (MM.DD.YYYY)</option>
+        <option value="ja-JP">Japanese (YYYY/MM/DD)</option>
         <option value="sr-RS">Serbian (MM.DD.YYYY.)</option>
       </select>
     </div>
-    <div class="config-item">
-      <label for="languageSelect">Language:</label>
-      <select id="languageSelect">
-        <option value="en">English</option>
-        <option value="de">German (Deutsch)</option>
-        <option value="fr">French (Français)</option>
-        <option value="es">Spanish (Español)</option>
-        <option value="ru">Russian (Русский)</option>
-        <option value="uk">Ukrainian (Українська)</option>
-        <option value="sr">Serbian (Srpski)</option>
-        <option value="tr">Turkish (Türkçe)</option>
-        <option value="ar">Arabic (العربية)</option>
-        <option value="zh">Chinese (中文)</option>
-        <option value="hi">Hindi (हिन्दी)</option>
-        <option value="ja">Japanese (日本語)</option>
-        <option value="ko">Korean (한국어)</option>
-        <option value="pt">Portuguese (Português)</option>
-        <option value="it">Italian (Italiano)</option>
-        <option value="nl">Dutch (Nederlands)</option>
-        <option value="pl">Polish (Polski)</option>
-        <option value="sv">Swedish (Svenska)</option>
-      </select>
-    </div>
+<!--    <div class="config-item">-->
+<!--      <label for="languageSelect">Language:</label>-->
+<!--      <select id="languageSelect">-->
+<!--        <option value="en">English</option>-->
+<!--        <option value="de">German (Deutsch)</option>-->
+<!--        <option value="fr">French (Français)</option>-->
+<!--        <option value="es">Spanish (Español)</option>-->
+<!--        <option value="ru">Russian (Русский)</option>-->
+<!--        <option value="uk">Ukrainian (Українська)</option>-->
+<!--        <option value="sr">Serbian (Srpski)</option>-->
+<!--        <option value="tr">Turkish (Türkçe)</option>-->
+<!--        <option value="ar">Arabic (العربية)</option>-->
+<!--        <option value="zh">Chinese (中文)</option>-->
+<!--        <option value="hi">Hindi (हिन्दी)</option>-->
+<!--        <option value="ja">Japanese (日本語)</option>-->
+<!--        <option value="ko">Korean (한국어)</option>-->
+<!--        <option value="pt">Portuguese (Português)</option>-->
+<!--        <option value="it">Italian (Italiano)</option>-->
+<!--        <option value="nl">Dutch (Nederlands)</option>-->
+<!--        <option value="pl">Polish (Polski)</option>-->
+<!--        <option value="sv">Swedish (Svenska)</option>-->
+<!--      </select>-->
+<!--    </div>-->
   </div>
-  
-  <div class="field" id="calendarContainer1"></div>
 
-  <hr/>
-
-  <div class="header">
-    <h2>Simple date picker</h2>
+  <!--  <div class="field" id="calendarContainer1"></div>-->
+  <div class="form-group">
+    <label for="calendarContainer1">Date and time</label>
+    <input type="text" id="calendarContainer1" name="calendarContainer1" placeholder="DD.MM.YYYY">
   </div>
-  <div class="field" id="calendarContainer2"></div>
 
+  <h2>Simple date picker</h2>
+  <!--  <div class="field" id="calendarContainer2"></div>-->
+  <div class="form-group">
+    <label for="calendarContainer1">Date</label>
+    <input type="text" id="calendarContainer2" name="calendarContainer2" placeholder="DD.MM.YYYY">
+  </div>
+
+
+</div>
   <script src="translations.js"></script>
   <script src="calendar.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Create date picker
-      const picker = new Calendula('#calendarContainer1', {
+      const picker = new Calendula(document.getElementById('calendarContainer1'), {
         showTime: true,
         showSeconds: false,
         minuteStep: 5,
@@ -168,9 +200,10 @@
       });
 
       // Create date picker
-      new Calendula('#calendarContainer2', {
+      new Calendula(document.getElementById('calendarContainer2'), {
         showTime: false,
         initialDate: new Date(),
+        language: 'zh',
       });
 
       // Setup config controls
@@ -213,6 +246,7 @@
       });
       
       languageSelect.addEventListener('change', (e) => {
+        console.log(e.target.value)
         picker.setConfig({
           language: e.target.value
         });
