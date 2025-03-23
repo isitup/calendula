@@ -24,6 +24,7 @@
 .calendula-time-container {
   width: 240px;
   background-color: #d8ecff;
+  flex: 1;
 }
 
 /* Media query for mobile devices */
@@ -50,7 +51,6 @@
 }
 
 .calendula-date-input {
-  width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -70,8 +70,6 @@
 
 .calendula-date-picker-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 550px;
   margin: 0 auto;
 }
 
