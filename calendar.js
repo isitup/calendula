@@ -737,29 +737,162 @@ class DateTimePicker {
     const input = this.elements.dateInput;
     const value = input.value;
     const cursorPos = input.selectionStart;
+
+    // Get the template format
+    let template = this.getFormattedDateTemplate();
     
-    // Get only the digits from the input value
-    const digits = value.replace(/\D/g, '');
-    
-    // If there are no digits, reset to default
-    if (digits.length === 0) {
-      this.updateDateInput();
-      return;
-    }
-    
-    // Create template format based on configuration
-    let template = 'DD.MM.YYYY';
+    // Get the expected formatted length based on configuration
+    let expectedLength = 10; // DD.MM.YYYY
     if (this.config.showTime) {
-      template += ' HH:MM';
+      expectedLength += 6; // + HH:MM
       if (this.config.showSeconds) {
-        template += ':SS';
+        expectedLength += 3; // + :SS
       }
     }
     
-    // Format the date string based on entered digits
-    let formattedValue = '';
-    let digitIndex = 0;
+    // Calculate difference between actual length and expected length
+    const lengthDiff = value.length - expectedLength;
+
+    // If no difference, or deletion occurred (negative difference), reset and handle normally
+    if (lengthDiff <= 0) {
+      // Get only the digits from the input value
+      const digits = value.replace(/\D/g, '');
+      
+      // If there are no digits, reset to default
+      if (digits.length === 0) {
+        this.updateDateInput();
+        return;
+      }
+      
+      // Update input with the formatted version
+      this.updateInputWithDigits(input, digits);
+      
+      // Restore cursor position
+      setTimeout(() => {
+        input.selectionStart = cursorPos;
+        input.selectionEnd = cursorPos;
+        this.state.cursorPosition = cursorPos;
+      }, 0);
+      
+      return;
+    }
     
+    // There's extra content - extract the characters to be inserted
+    // Calculate start position for extraction (before the cursor)
+    const extractStart = Math.max(0, cursorPos - lengthDiff);
+    
+    // Extract the substring that contains the added characters
+    const extractedChars = value.substring(extractStart, cursorPos);
+    
+    // Get only digits from the extracted characters
+    const digitsToInsert = extractedChars.replace(/\D/g, '');
+    
+    // If no digits to insert, exit early
+    if (!digitsToInsert) {
+      // Reset to the properly formatted value
+      const digits = value.replace(/\D/g, '');
+      this.updateInputWithDigits(input, digits);
+      
+      // Restore cursor position
+      setTimeout(() => {
+        input.selectionStart = cursorPos;
+        input.selectionEnd = cursorPos;
+        this.state.cursorPosition = cursorPos;
+      }, 0);
+      
+      return;
+    }
+    
+    // Get the value from the current value (without the extra characters)
+    const originalValue = value.substring(0, cursorPos-lengthDiff) + value.substring(cursorPos)
+    // Get the original digits from the original value (without the extra characters)
+    const originalDigitsWithoutInserted = originalValue.replace(/\D/g, '');
+    
+    // Get a clean formatted template
+    let cleanTemplate = '';
+    if (originalDigitsWithoutInserted.length === 0) {
+      // If no digits, use the default template
+      cleanTemplate = this.getDefaultFormattedDate();
+    } else {
+      // Otherwise, format the existing digits
+      cleanTemplate = this.formatDigitsToDateString(originalDigitsWithoutInserted);
+    }
+    
+    // Start cursor at the current position, adjusted for the clean template
+    let newCursorPos = extractStart;
+    
+    // Create the result by overwriting digits one by one at cursor position
+    let result = cleanTemplate;
+
+    // Iterate through each digit to insert
+    for (let i = 0; i < digitsToInsert.length; i++) {
+      const digit = digitsToInsert[i];
+      
+      // Skip non-digits (shouldn't happen since we filtered them out, but just in case)
+      if (!/\d/.test(digit)) continue;
+      
+      // Find the next digit position at or after the cursor
+      while (newCursorPos < result.length && !/\d/.test(result[newCursorPos])) {
+        newCursorPos++;
+      }
+      
+      // If we've reached the end, break
+      if (newCursorPos >= result.length) break;
+      
+      // Replace the digit at the current position
+      result = 
+        result.substring(0, newCursorPos) + 
+        digit + 
+        result.substring(newCursorPos + 1);
+      
+      // Move cursor to next position
+      newCursorPos++;
+      
+      // Skip over delimiters
+      while (newCursorPos < result.length && !/\d/.test(result[newCursorPos])) {
+        newCursorPos++;
+      }
+    }
+    
+    // Update the input with the new value
+    input.value = result;
+    
+    // Update the calendar with the new date
+    this.handleInputChange(false);
+    
+    // Set the cursor position after the last inserted digit
+    setTimeout(() => {
+      input.selectionStart = newCursorPos;
+      input.selectionEnd = newCursorPos;
+      this.state.cursorPosition = newCursorPos;
+    }, 0);
+    
+    // Prevent default handling
+    e.preventDefault();
+  }
+  
+  /**
+   * Updates input field with formatted date string from digits
+   * @param {HTMLInputElement} input - The input element
+   * @param {string} digits - String of digits to format
+   */
+  updateInputWithDigits(input, digits) {
+    // Format the digits to a date string
+    const formattedValue = this.formatDigitsToDateString(digits);
+    
+    // Update the input value
+    input.value = formattedValue;
+    
+    // Update the calendar with the new date
+    this.handleInputChange(false);
+  }
+  
+  /**
+   * Formats digits into a date string
+   * @param {string} digits - String of digits to format
+   * @returns {string} Formatted date string
+   */
+  formatDigitsToDateString(digits) {
     // Create a properly formatted template
     let day = '00', month = '00', year = '0000';
     let hours = '00', minutes = '00', seconds = '00';
@@ -782,7 +915,7 @@ class DateTimePicker {
     }
     
     // Build the formatted date string
-    formattedValue = `${day}.${month}.${year}`;
+    let formattedValue = `${day}.${month}.${year}`;
     if (this.config.showTime) {
       formattedValue += ` ${hours}:${minutes}`;
       if (this.config.showSeconds) {
@@ -790,21 +923,37 @@ class DateTimePicker {
       }
     }
     
-    // Update the input value
-    input.value = formattedValue;
-    
-    // Update the calendar with the new date
-    this.handleInputChange(false);
-    
-    // Calculate new cursor position
-    const newCursorPos = this.calculateNewCursorPosition(digits.length, this.config.showTime, this.config.showSeconds);
-    
-    // Restore cursor position
-    setTimeout(() => {
-      input.selectionStart = newCursorPos;
-      input.selectionEnd = newCursorPos;
-      this.state.cursorPosition = newCursorPos;
-    }, 0);
+    return formattedValue;
+  }
+  
+  /**
+   * Gets a default formatted date with zeros
+   * @returns {string} Default formatted date
+   */
+  getDefaultFormattedDate() {
+    let formattedValue = '00.00.0000';
+    if (this.config.showTime) {
+      formattedValue += ' 00:00';
+      if (this.config.showSeconds) {
+        formattedValue += ':00';
+      }
+    }
+    return formattedValue;
+  }
+  
+  /**
+   * Returns a formatted date template based on configuration
+   * @returns {string} Date template (e.g., "DD.MM.YYYY HH:MM:SS")
+   */
+  getFormattedDateTemplate() {
+    let template = 'DD.MM.YYYY';
+    if (this.config.showTime) {
+      template += ' HH:MM';
+      if (this.config.showSeconds) {
+        template += ':SS';
+      }
+    }
+    return template;
   }
   
   /**
@@ -1768,7 +1917,7 @@ class DateTimePicker {
     // We use setTimeout to ensure this runs after the browser's default handling
     setTimeout(() => {
       input.setSelectionRange(newPosition, newPosition);
-    }, 50);
+    }, 0);
   }
 
   /**
