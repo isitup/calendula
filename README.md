@@ -1,6 +1,9 @@
 # Simple DateTime Picker
 
-A lightweight, customizable, and multilingual date and time picker component built with vanilla JavaScript. No dependencies required!
+A lightweight, customizable, and multilingual date and time picker component built with vanilla JavaScript. 
+No dependencies required!
+
+[Demo, examples ✿](https://isitup.github.io/calendula/)
 
 ![Calendar Preview](calendula.jpg)
 
@@ -26,9 +29,9 @@ npm install calendular
 Include the necessary files in your HTML:
 
 ```html
-<link rel="stylesheet" href="styles.css">
-<script src="translations.js"></script>
-<script src="calendar.js"></script>
+<link rel="stylesheet" href="https://isitup.github.io/calendula/styles.css">
+<script src="https://isitup.github.io/calendula/translations.js"></script>
+<script src="https://isitup.github.io/calendula/calendar.js"></script>
 ```
 
 ## Usage
@@ -43,7 +46,7 @@ import 'calendular/styles.css';
 
 // Initialize the component on an input element
 document.addEventListener('DOMContentLoaded', function() {
-  const picker = new Calendula('#myDateInput', {
+  const picker = new Calendula(document.getElementById('myDateInput'), {
     showTime: true,
     language: 'en'
   });
@@ -56,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://isitup.github.io/calendula/styles.css">
 </head>
 <body>
   <form>
@@ -66,13 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
     <label for="appointment">Appointment:</label>
     <input type="text" id="appointment" name="appointment" class="date-input" placeholder="DD.MM.YYYY HH:MM">
   </form>
-  
-  <script src="translations.js"></script>
-  <script src="calendar.js"></script>
+
+  <script src="https://isitup.github.io/calendula/translations.js"></script>
+  <script src="https://isitup.github.io/calendula/calendar.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize date picker on first input (date only)
-      const datePicker = new Calendula('#birthdate', {
+      const datePicker = new Calendula(document.getElementById('birthdate'), {
         showTime: false
       });
       
@@ -93,7 +96,7 @@ The component accepts the following options:
 
 ```javascript
 // Pass an input element selector or DOM element as the first parameter
-const picker = new Calendula('#dateInput', {
+const picker = new Calendula(document.getElementById('dateInput'), {
   // Show time picker (default: false)
   showTime: true,
   

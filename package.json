@@ -20,13 +20,13 @@
   ],
   "author": "Nick",
   "license": "MIT",
-  "homepage": "https://github.com/mnvxxx/calendar",
+  "homepage": "https://github.com/isitup/calendula",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mnvxxx/calendar.git"
+    "url": "git+https://github.com/isitup/calendula.git"
   },
   "bugs": {
-    "url": "https://github.com/mnvxxx/calendar/issues"
+    "url": "https://github.com/isitup/calendula/issues"
   },
   "files": [
     "index.js",
