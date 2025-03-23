@@ -193,12 +193,12 @@ class Calendula {
     calendarHeader.className = 'calendula-calendar-header';
     calendarHeader.innerHTML = `
       <div class="calendula-month-nav">
-        <button class="calendula-prev-month">&lt;</button>
+        <button class="calendula-prev-month" tabindex="-1">&lt;</button>
         <div class="calendula-month-year-selector">
           <span class="calendula-month-title"></span>
           <span class="calendula-year-title"></span>
         </div>
-        <button class="calendula-next-month">&gt;</button>
+        <button class="calendula-next-month" tabindex="-1">&gt;</button>
       </div>
       <div class="calendula-month-selector" style="display: none;"></div>
       <div class="calendula-year-selector" style="display: none;"></div>
