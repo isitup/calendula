@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Calendula - Light and Dark Themes</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .theme-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+    }
+    
+    .theme-section {
+      flex: 1;
+      min-width: 300px;
+      max-width: 550px;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    
+    .light-theme {
+      background-color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .dark-theme {
+      background-color: #2d2d2d;
+      color: #f0f0f0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    
+    .dark-theme input {
+      background-color: #333;
+      color: #f0f0f0;
+      border-color: #555;
+    }
+    
+    .dark-theme input::placeholder {
+      color: #aaa;
+    }
+    
+    .toggle-section {
+      margin: 30px 0;
+      text-align: center;
+    }
+    
+    .theme-toggle {
+      padding: 10px 20px;
+      background-color: #4a86e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .theme-toggle:hover {
+      background-color: #3a76d8;
+    }
+
+    .code-block {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .dark-theme .code-block {
+      background-color: #222;
+    }
+
+    pre {
+      margin: 0;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .dark-theme pre {
+      color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calendula - Light and Dark Themes</h1>
+    
+    <div class="theme-demo">
+      <!-- Light Theme Section -->
+      <div class="theme-section light-theme">
+        <h2>Light Theme</h2>
+        
+        <div class="form-group">
+          <label for="lightDate">Date:</label>
+          <input type="text" id="lightDate" name="lightDate" placeholder="DD.MM.YYYY">
+        </div>
+        
+        <div class="form-group">
+          <label for="lightDateTime">Date & Time:</label>
+          <input type="text" id="lightDateTime" name="lightDateTime" placeholder="DD.MM.YYYY HH:MM">
+        </div>
+        
+        <div class="code-block">
+          <pre>&lt;link rel="stylesheet" href="styles.css"&gt;</pre>
+        </div>
+      </div>
+      
+      <!-- Dark Theme Section -->
+      <div class="theme-section dark-theme">
+        <h2>Dark Theme</h2>
+        
+        <div class="form-group">
+          <label for="darkDate">Date:</label>
+          <input type="text" id="darkDate" name="darkDate" placeholder="DD.MM.YYYY">
+        </div>
+        
+        <div class="form-group">
+          <label for="darkDateTime">Date & Time:</label>
+          <input type="text" id="darkDateTime" name="darkDateTime" placeholder="DD.MM.YYYY HH:MM">
+        </div>
+        
+        <div class="code-block">
+          <pre>&lt;!-- Include base styles --&gt;
+&lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;!-- Then include dark theme override --&gt;
+&lt;link rel="stylesheet" href="dark-theme.css"&gt;</pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="toggle-section">
+      <p>To use the dark theme, include both the base styles.css and dark-theme.css.</p>
+    </div>
+  </div>
+  
+  <script src="translations.js"></script>
+  <script src="calendar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Apply dark theme to dark section
+      const darkThemeLink = document.createElement('link');
+      darkThemeLink.rel = 'stylesheet';
+      darkThemeLink.href = 'dark-theme.css';
+      document.head.appendChild(darkThemeLink);
+      
+      // Create a scoped stylesheet that applies dark theme CSS only to dark section
+      const scopedDarkStyle = document.createElement('style');
+      scopedDarkStyle.textContent = `
+        /* Scope dark theme to just the dark section */
+        .light-theme .calendula-date-time-picker {
+          /* Reset to light theme */
+          --calendula-bg-primary: white;
+          --calendula-bg-secondary: #f9f9f9;
+          --calendula-bg-tertiary: #f0f0f0;
+          --calendula-bg-time: #d8ecff;
+          --calendula-text-primary: #333333;
+          --calendula-text-secondary: #666666;
+          --calendula-border-light: #eeeeee;
+          --calendula-border-input: #cccccc;
+          --calendula-btn-hover: #f0f0f0;
+          --calendula-nav-arrow: #666666;
+          --calendula-today-bg: #e6f2ff;
+          --calendula-selected-bg: #007bff;
+          --calendula-selected-hover: #0069d9;
+          --calendula-selected-text: white;
+          --calendula-time-item-bg: white;
+          --calendula-time-item-hover: #f0f1f2;
+          --calendula-shadow: rgba(0, 0, 0, 0.1);
+          --calendula-shadow-deep: rgba(0, 0, 0, 0.2);
+          --calendula-input-bg: white;
+          --calendula-input-text: #333333;
+          --calendula-input-placeholder: #999999;
+        }
+      `;
+      document.head.appendChild(scopedDarkStyle);
+      
+      // Initialize calendars
+      setTimeout(() => {
+        // Light theme
+        new Calendula(document.getElementById('lightDate'), {
+          showTime: false
+        });
+        
+        new Calendula(document.getElementById('lightDateTime'), {
+          showTime: true,
+          showSeconds: false,
+          minuteStep: 5
+        });
+        
+        // Dark theme
+        new Calendula(document.getElementById('darkDate'), {
+          showTime: false
+        });
+        
+        new Calendula(document.getElementById('darkDateTime'), {
+          showTime: true,
+          showSeconds: false,
+          minuteStep: 5
+        });
+      }, 100);
+    });
+  </script>
+</body>
+</html>

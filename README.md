@@ -38,13 +38,26 @@ Include the necessary files in your HTML:
 
 ### Theme Options
 
-The component comes with both light and dark themes. To use the dark theme, simply include the dark-styles.css file instead of styles.css:
+The component comes with both light and dark themes using CSS variables. To use the dark theme, include both the base styles and the dark theme override:
 
 ```html
-<!-- Dark Theme -->
-<link rel="stylesheet" href="https://isitup.github.io/calendula/dark-styles.css">
+<!-- Light Theme (base styles) -->
+<link rel="stylesheet" href="https://isitup.github.io/calendula/styles.css">
+<!-- Dark Theme (overrides variables) -->
+<!--<link rel="stylesheet" href="https://isitup.github.io/calendula/dark-theme.css">-->
 <script src="https://isitup.github.io/calendula/translations.js"></script>
 <script src="https://isitup.github.io/calendula/calendar.js"></script>
+```
+
+You can also create your own themes by overriding the CSS variables:
+
+```css
+:root {
+  /* Base colors */
+  --calendula-bg-primary: #your-color;
+  --calendula-bg-secondary: #your-color;
+  /* And other variables... */
+}
 ```
 
 ## Usage
@@ -54,10 +67,10 @@ The component comes with both light and dark themes. To use the dark theme, simp
 ```javascript
 // Import the component
 import { Calendula } from 'calendular';
-// Import the light theme (default)
+// Import the light theme (required base styles)
 import 'calendular/styles.css';
-// Or import the dark theme instead
-// import 'calendular/dark-styles.css';
+// Import the dark theme (optional override)
+// import 'calendular/dark-theme.css';
 
 // Initialize the component on an input element
 document.addEventListener('DOMContentLoaded', function() {

@@ -1,0 +1,40 @@
+/* Calendula Date Time Picker Dark Theme */
+
+:root {
+  /* Base colors */
+  --calendula-bg-primary: #222222;
+  --calendula-bg-secondary: #333333;
+  --calendula-bg-tertiary: #444444;
+  --calendula-bg-time: #1a1a2e;
+  
+  /* Text colors */
+  --calendula-text-primary: #f0f0f0;
+  --calendula-text-secondary: #cccccc;
+  
+  /* Border colors */
+  --calendula-border-light: #444444;
+  --calendula-border-input: #555555;
+  
+  /* Button and interactive elements */
+  --calendula-btn-hover: #444444;
+  --calendula-nav-arrow: #cccccc;
+  
+  /* Highlight colors */
+  --calendula-today-bg: #1a3a5f;
+  --calendula-selected-bg: #0066cc;
+  --calendula-selected-hover: #0055aa;
+  --calendula-selected-text: white;
+  
+  /* Time items */
+  --calendula-time-item-bg: #333333;
+  --calendula-time-item-hover: #444444;
+  
+  /* Shadow */
+  --calendula-shadow: rgba(0, 0, 0, 0.4);
+  --calendula-shadow-deep: rgba(0, 0, 0, 0.5);
+  
+  /* Input field */
+  --calendula-input-bg: #333333;
+  --calendula-input-text: #f0f0f0;
+  --calendula-input-placeholder: #999999;
+}
