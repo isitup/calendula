@@ -1,10 +1,20 @@
 /**
- * DateTimePicker - Date and Time Picker Component
+ * Calendula - Date and Time Picker Component
  * Creates an interactive calendar with time selection in the specified container
+ * 
+ * @version 1.0.0
+ * @license MIT
  */
-class DateTimePicker {
+
+// Use IIFE pattern to avoid polluting global scope
+(function(global) {
+
+/**
+ * Calendula class implementation
+ */
+class Calendula {
   /**
-   * Creates an instance of DateTimePicker
+   * Creates an instance of Calendula
    * @param {string|HTMLElement} container - Selector or DOM element of the container
    * @param {Object} options - Configuration options
    */
@@ -14,7 +24,7 @@ class DateTimePicker {
       : container;
 
     if (!this.container) {
-      throw new Error('DateTimePicker: Container not found');
+      throw new Error('Calendula: Container not found');
     }
 
     // Load translations from external file
@@ -1975,7 +1985,7 @@ class DateTimePicker {
    */
   setDate(date) {
     if (!(date instanceof Date) || isNaN(date.getTime())) {
-      throw new Error('DateTimePicker: Invalid date');
+      throw new Error('Calendula: Invalid date');
     }
 
     this.state.currentDate = new Date(date);
@@ -2066,3 +2076,13 @@ class DateTimePicker {
     this.updateDateInput();
   }
 }
+
+// Export Calendula to make it available globally
+global.Calendula = Calendula;
+
+// Support CommonJS/Node.js module exports
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Calendula;
+}
+
+})(typeof window !== 'undefined' ? window : global);

@@ -1,8 +1,14 @@
 /**
  * Calendar Component Translations
  * This file contains translations for the calendar UI in multiple languages
+ * 
+ * @version 1.0.0
+ * @license MIT
  */
 
+(function(global) {
+
+// Define translations object
 const CALENDULA_TRANSLATIONS = {
   // English
   'en': {
@@ -365,7 +371,12 @@ const CALENDULA_TRANSLATIONS = {
   }
 };
 
-// Export the translations
+// Make translations available globally
+global.CALENDULA_TRANSLATIONS = CALENDULA_TRANSLATIONS;
+
+// Export the translations for CommonJS/Node.js
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = CALENDULA_TRANSLATIONS;
 }
+
+})(typeof window !== 'undefined' ? window : global);
