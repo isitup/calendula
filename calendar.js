@@ -193,21 +193,20 @@ class Calendula {
     calendarHeader.className = 'calendula-calendar-header';
     calendarHeader.innerHTML = `
       <div class="calendula-month-nav">
-        <button id="prevMonth">&lt;</button>
+        <button class="calendula-prev-month">&lt;</button>
         <div class="calendula-month-year-selector">
-          <span class="calendula-month-title" id="monthTitle"></span>
-          <span class="calendula-year-title" id="yearTitle"></span>
+          <span class="calendula-month-title"></span>
+          <span class="calendula-year-title"></span>
         </div>
-        <button id="nextMonth">&gt;</button>
+        <button class="calendula-next-month">&gt;</button>
       </div>
-      <div class="calendula-month-selector" id="monthSelector" style="display: none;"></div>
-      <div class="calendula-year-selector" id="yearSelector" style="display: none;"></div>
+      <div class="calendula-month-selector" style="display: none;"></div>
+      <div class="calendula-year-selector" style="display: none;"></div>
     `;
 
     // Grid for calendar days
     const calendarGrid = document.createElement('div');
     calendarGrid.className = 'calendula-calendar-grid';
-    calendarGrid.id = 'calendarGrid';
 
     // Container for time
     const timeContainer = document.createElement('div');
@@ -218,7 +217,7 @@ class Calendula {
     hoursSection.className = 'calendula-time-section';
     hoursSection.innerHTML = `
       <div class="calendula-time-title">${this.getTranslation('timeLabels.hours')}</div>
-      <div class="calendula-time-grid calendula-hours-grid" id="hoursGrid"></div>
+      <div class="calendula-time-grid calendula-hours-grid"></div>
     `;
 
     // Minutes section
@@ -228,9 +227,9 @@ class Calendula {
       <div class="calendula-time-title">${this.getTranslation('timeLabels.minutes')}</div>
       <div class="calendula-time-section-container">
         <div class="calendula-time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.tens')}</div>
-        <div class="calendula-time-grid calendula-ten-minutes-grid" id="tenMinutesGrid"></div>
+        <div class="calendula-time-grid calendula-ten-minutes-grid"></div>
         <div class="calendula-time-title" style="font-size: 12px; margin-top: 8px;">${this.getTranslation('timeLabels.units')}</div>
-        <div class="calendula-time-grid calendula-minutes-grid" id="minutesGrid"></div>
+        <div class="calendula-time-grid calendula-minutes-grid"></div>
       </div>
     `;
 
@@ -239,7 +238,7 @@ class Calendula {
     secondsSection.className = 'calendula-time-section';
     secondsSection.innerHTML = `
       <div class="calendula-time-title">${this.getTranslation('timeLabels.seconds')}</div>
-      <div class="calendula-time-grid calendula-seconds-grid" id="secondsGrid"></div>
+      <div class="calendula-time-grid calendula-seconds-grid"></div>
     `;
 
     // Assemble DOM structure
@@ -302,17 +301,17 @@ class Calendula {
   findElements() {
     this.elements = {
       dateInput: this.dateInput,
-      monthTitle: this.container.querySelector('#monthTitle'),
-      yearTitle: this.container.querySelector('#yearTitle'),
-      prevMonthBtn: this.container.querySelector('#prevMonth'),
-      nextMonthBtn: this.container.querySelector('#nextMonth'),
-      calendarGrid: this.container.querySelector('#calendarGrid'),
-      monthSelector: this.container.querySelector('#monthSelector'),
-      yearSelector: this.container.querySelector('#yearSelector'),
-      hoursGrid: this.container.querySelector('#hoursGrid'),
-      tenMinutesGrid: this.container.querySelector('#tenMinutesGrid'),
-      minutesGrid: this.container.querySelector('#minutesGrid'),
-      secondsGrid: this.container.querySelector('#secondsGrid')
+      monthTitle: this.container.querySelector('.calendula-month-title'),
+      yearTitle: this.container.querySelector('.calendula-year-title'),
+      prevMonthBtn: this.container.querySelector('.calendula-prev-month'),
+      nextMonthBtn: this.container.querySelector('.calendula-next-month'),
+      calendarGrid: this.container.querySelector('.calendula-calendar-grid'),
+      monthSelector: this.container.querySelector('.calendula-month-selector'),
+      yearSelector: this.container.querySelector('.calendula-year-selector'),
+      hoursGrid: this.container.querySelector('.calendula-hours-grid'),
+      tenMinutesGrid: this.container.querySelector('.calendula-ten-minutes-grid'),
+      minutesGrid: this.container.querySelector('.calendula-minutes-grid'),
+      secondsGrid: this.container.querySelector('.calendula-seconds-grid')
     };
   }
 
