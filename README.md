@@ -12,6 +12,7 @@ No dependencies required!
 - Pure JavaScript implementation - no dependencies
 - Date and time selection with configurable time steps
 - 18 languages supported out of the box
+- Light and dark themes included
 - Mobile-friendly design
 - Customizable date formats
 - Easy integration with any project
@@ -29,7 +30,19 @@ npm install calendular
 Include the necessary files in your HTML:
 
 ```html
+<!-- Light Theme (default) -->
 <link rel="stylesheet" href="https://isitup.github.io/calendula/styles.css">
+<script src="https://isitup.github.io/calendula/translations.js"></script>
+<script src="https://isitup.github.io/calendula/calendar.js"></script>
+```
+
+### Theme Options
+
+The component comes with both light and dark themes. To use the dark theme, simply include the dark-styles.css file instead of styles.css:
+
+```html
+<!-- Dark Theme -->
+<link rel="stylesheet" href="https://isitup.github.io/calendula/dark-styles.css">
 <script src="https://isitup.github.io/calendula/translations.js"></script>
 <script src="https://isitup.github.io/calendula/calendar.js"></script>
 ```
@@ -41,8 +54,10 @@ Include the necessary files in your HTML:
 ```javascript
 // Import the component
 import { Calendula } from 'calendular';
-// Also import the styles
+// Import the light theme (default)
 import 'calendular/styles.css';
+// Or import the dark theme instead
+// import 'calendular/dark-styles.css';
 
 // Initialize the component on an input element
 document.addEventListener('DOMContentLoaded', function() {

@@ -1,0 +1,330 @@
+/* Calendula Date Time Picker Component - Dark Theme */
+
+.calendula-date-time-picker {
+  max-width: 550px;
+  background-color: #222222;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  margin: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  position: absolute;
+  z-index: 1000;
+  display: none; /* Hidden by default */
+  color: #f0f0f0;
+}
+
+.calendula-calendar-container {
+  flex: 1;
+  min-width: 280px;
+  border-right: 1px solid #444444;
+}
+
+.calendula-time-container {
+  width: 240px;
+  background-color: #1a1a2e; /* Dark blue shade */
+  flex: 1;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 540px) {
+  .calendula-date-time-picker {
+    flex-direction: column;
+  }
+  
+  .calendula-calendar-container {
+    border-right: none;
+    border-bottom: 1px solid #444444;
+    width: 100%;
+  }
+  
+  .calendula-time-container {
+    width: 100%;
+  }
+}
+
+.calendula-input-container {
+  position: relative;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.calendula-date-picker-wrapper {
+  position: relative;
+  margin: 0 auto;
+}
+
+.calendula-date-input {
+  background-color: #333333;
+  color: #f0f0f0;
+  border: 1px solid #555555;
+}
+
+.calendula-date-input::placeholder {
+  color: #999999;
+}
+
+@media (max-width: 540px) {
+  .calendula-input-container {
+    padding: 0;
+    margin-bottom: 8px;
+  }
+}
+
+.calendula-calendar-header {
+  position: relative;
+  padding: 12px;
+  background-color: #333333;
+}
+
+.calendula-month-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendula-month-nav button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: #f0f0f0;
+}
+
+.calendula-month-nav button:hover {
+  background-color: #444444;
+}
+
+/* Navigation arrow styling */
+.calendula-nav-arrow {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  position: relative;
+}
+
+/* Left arrow */
+.calendula-arrow-left:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-left: 2px solid #cccccc;
+  border-bottom: 2px solid #cccccc;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Right arrow */
+.calendula-arrow-right:before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #cccccc;
+  border-top: 2px solid #cccccc;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.calendula-month-year-selector {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.calendula-month-title, .calendula-year-title {
+  font-weight: bold;
+  margin: 0 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #f0f0f0;
+}
+
+.calendula-month-title:hover, .calendula-year-title:hover {
+  background-color: #444444;
+}
+
+.calendula-month-selector, .calendula-year-selector {
+  position: absolute;
+  background-color: #333333;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  z-index: 10;
+  width: 280px;
+  margin-top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 4px;
+}
+
+.calendula-month-item, .calendula-year-item {
+  padding: 8px 0;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 2px;
+  font-size: 14px;
+  color: #f0f0f0;
+}
+
+.calendula-month-item {
+  padding: 10px 0;
+  font-weight: 500;
+}
+
+.calendula-month-item:hover, .calendula-year-item:hover {
+  background-color: #444444;
+}
+
+.calendula-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 8px;
+}
+
+.calendula-weekday {
+  text-align: center;
+  font-weight: bold;
+  color: #aaaaaa;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+.calendula-calendar-day {
+  text-align: center;
+  padding: 8px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #f0f0f0;
+}
+
+.calendula-calendar-day:hover {
+  background-color: #444444;
+}
+
+.calendula-empty-day {
+  visibility: hidden;
+}
+
+.calendula-today {
+  background-color: #1a3a5f; /* Dark blue for today */
+}
+
+.calendula-calendar-day.calendula-selected,
+.calendula-month-item.calendula-selected,
+.calendula-year-item.calendula-selected {
+  background-color: #0066cc; /* Darker blue for selection */
+  color: white;
+}
+
+.calendula-calendar-day.calendula-selected:hover,
+.calendula-month-item.calendula-selected:hover,
+.calendula-year-item.calendula-selected:hover {
+  background-color: #0055aa;
+}
+
+.calendula-time-section {
+  padding: 12px;
+  border-bottom: 1px solid #444444;
+}
+
+.calendula-time-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #cccccc;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.calendula-time-grid {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.calendula-hours-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.calendula-ten-minutes-grid {
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+}
+
+.calendula-minutes-grid {
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.calendula-seconds-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.calendula-time-item {
+  padding: 6px 0;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+  background-color: #333333;
+  color: #f0f0f0;
+}
+
+.calendula-time-item:hover {
+  background-color: #444444;
+}
+
+@media (max-width: 540px) {
+  .calendula-time-section {
+    padding: 10px;
+  }
+  
+  .calendula-time-grid {
+    gap: 3px;
+  }
+  
+  .calendula-time-item {
+    padding: 8px 0;
+    font-size: 14px;
+  }
+  
+  /* Adaptive layout for small screens */
+  .calendula-hours-grid {
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  
+  .calendula-seconds-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.calendula-time-item.calendula-selected {
+  background-color: #0066cc;
+  color: white;
+}
+
+.calendula-time-item.calendula-selected:hover {
+  background-color: #0055aa;
+}
+
+.calendula-date-input-wrapper {
+  position: relative;
+}
+
+.calendula-time-section-container {
+  display: block;
+  width: 100%;
+}
