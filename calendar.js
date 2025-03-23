@@ -17,6 +17,9 @@ class DateTimePicker {
       throw new Error('DateTimePicker: Container not found');
     }
 
+    // Load translations from external file
+    this.translations = typeof CALENDULA_TRANSLATIONS !== 'undefined' ? CALENDULA_TRANSLATIONS : {};
+
     // Default settings
     this.config = {
       showTime: options.showTime !== undefined ? options.showTime : false,
@@ -39,10 +42,7 @@ class DateTimePicker {
       selectedSecond: this.config.initialDate.getSeconds(),
       cursorPosition: 0
     };
-    
-    // Initialize translations
-    this.translations = this.getTranslations();
-    
+
     // Initialize month names and abbreviations from translations
     const lang = this.getLanguage();
     this.monthNames = this.translations[lang].monthNames;
@@ -77,8 +77,7 @@ class DateTimePicker {
    * @returns {boolean} True if supported
    */
   isSupportedLanguage(lang) {
-    const supportedLanguages = ['en', 'fr', 'es', 'ru', 'sr', 'tr', 'ar', 'zh', 'hi', 'uk', 'de'];
-    return supportedLanguages.includes(lang);
+    return typeof this.translations[lang] !== 'undefined';
   }
   
   /**
@@ -90,223 +89,6 @@ class DateTimePicker {
     return this.isSupportedLanguage(this.config.language) ? this.config.language : 'en';
   }
   
-  /**
-   * Gets translations for all languages
-   * @returns {Object} Translations object
-   */
-  getTranslations() {
-    return {
-      // English
-      'en': {
-        monthNames: [
-          'January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December'
-        ],
-        monthAbbreviations: [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-        ],
-        weekdayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        timeLabels: {
-          hours: 'Hours',
-          minutes: 'Minutes',
-          seconds: 'Seconds',
-          tens: 'Tens',
-          units: 'Minutes'
-        }
-      },
-      // German
-      'de': {
-        monthNames: [
-          'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-          'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
-        ],
-        monthAbbreviations: [
-          'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
-        ],
-        weekdayNames: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
-        timeLabels: {
-          hours: 'Stunden',
-          minutes: 'Minuten',
-          seconds: 'Sekunden',
-          tens: 'Zehner',
-          units: 'Minuten'
-        }
-      },
-      // Ukrainian
-      'uk': {
-        monthNames: [
-          'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
-          'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
-        ],
-        monthAbbreviations: [
-          'Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер',
-          'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'
-        ],
-        weekdayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
-        timeLabels: {
-          hours: 'Години',
-          minutes: 'Хвилини',
-          seconds: 'Секунди',
-          tens: 'Десятки',
-          units: 'Хвилини'
-        }
-      },
-      // Russian
-      'ru': {
-        monthNames: [
-          'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-          'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ],
-        monthAbbreviations: [
-          'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
-          'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
-        ],
-        weekdayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-        timeLabels: {
-          hours: 'Часы',
-          minutes: 'Минуты',
-          seconds: 'Секунды',
-          tens: 'Десятки',
-          units: 'Минуты'
-        }
-      },
-      // French
-      'fr': {
-        monthNames: [
-          'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-          'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-        ],
-        monthAbbreviations: [
-          'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
-          'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
-        ],
-        weekdayNames: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-        timeLabels: {
-          hours: 'Heures',
-          minutes: 'Minutes',
-          seconds: 'Secondes',
-          tens: 'Dizaines',
-          units: 'Minutes'
-        }
-      },
-      // Spanish
-      'es': {
-        monthNames: [
-          'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-        ],
-        monthAbbreviations: [
-          'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-        ],
-        weekdayNames: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-        timeLabels: {
-          hours: 'Horas',
-          minutes: 'Minutos',
-          seconds: 'Segundos',
-          tens: 'Decenas',
-          units: 'Minutos'
-        }
-      },
-      // Serbian
-      'sr': {
-        monthNames: [
-          'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun',
-          'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'
-        ],
-        monthAbbreviations: [
-          'Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun',
-          'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'
-        ],
-        weekdayNames: ['Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub', 'Ned'],
-        timeLabels: {
-          hours: 'Sati',
-          minutes: 'Minuti',
-          seconds: 'Sekunde',
-          tens: 'Desetice',
-          units: 'Minute'
-        }
-      },
-      // Turkish
-      'tr': {
-        monthNames: [
-          'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-          'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-        ],
-        monthAbbreviations: [
-          'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-          'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
-        ],
-        weekdayNames: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-        timeLabels: {
-          hours: 'Saat',
-          minutes: 'Dakika',
-          seconds: 'Saniye',
-          tens: 'Onlar',
-          units: 'Dakika'
-        }
-      },
-      // Arabic
-      'ar': {
-        monthNames: [
-          'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-          'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-        ],
-        monthAbbreviations: [
-          'ينا', 'فبر', 'مار', 'أبر', 'ماي', 'يون',
-          'يول', 'أغس', 'سبت', 'أكت', 'نوف', 'ديس'
-        ],
-        weekdayNames: ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'],
-        timeLabels: {
-          hours: 'ساعات',
-          minutes: 'دقائق',
-          seconds: 'ثواني',
-          tens: 'عشرات',
-          units: 'دقائق'
-        }
-      },
-      // Chinese
-      'zh': {
-        monthNames: [
-          '一月', '二月', '三月', '四月', '五月', '六月',
-          '七月', '八月', '九月', '十月', '十一月', '十二月'
-        ],
-        monthAbbreviations: [
-          '一月', '二月', '三月', '四月', '五月', '六月',
-          '七月', '八月', '九月', '十月', '十一月', '十二月'
-        ],
-        weekdayNames: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-        timeLabels: {
-          hours: '小时',
-          minutes: '分钟',
-          seconds: '秒',
-          tens: '十位',
-          units: '分钟'
-        }
-      },
-      // Hindi
-      'hi': {
-        monthNames: [
-          'जनवरी', 'फरवरी', 'मार्च', 'अप्रैल', 'मई', 'जून',
-          'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'
-        ],
-        monthAbbreviations: [
-          'जन', 'फर', 'मार्च', 'अप्रै', 'मई', 'जून',
-          'जुल', 'अग', 'सित', 'अक्टू', 'नव', 'दिस'
-        ],
-        weekdayNames: ['सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि', 'रवि'],
-        timeLabels: {
-          hours: 'घंटे',
-          minutes: 'मिनट',
-          seconds: 'सेकंड',
-          tens: 'दहाई',
-          units: 'मिनट'
-        }
-      }
-    };
-  }
 
   /**
    * Gets translation for a specific key
