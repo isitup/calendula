@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <input type="text" id="birthdate" name="birthdate" placeholder="DD.MM.YYYY">
     
     <label for="appointment">Appointment:</label>
-    <input type="text" id="appointment" name="appointment" class="date-input" placeholder="DD.MM.YYYY HH:MM">
+    <input type="text" id="appointment" name="appointment" class="date-input" placeholder="DD.MM.YYYY HH:mm">
   </form>
 
   <script src="https://isitup.github.io/calendula/translations.js"></script>
@@ -142,8 +142,9 @@ const picker = new Calendula(document.getElementById('dateInput'), {
     console.log('Selected date:', date);
   },
   
-  // Date format locale (default: based on browser locale)
-  dateFormat: 'en-US',
+  // Date format pattern (default: 'DD.MM.YYYY')
+  // Examples: 'YYYY-MM-DD', 'MM/DD/YYYY', 'DD.MM.YYYY HH:mm:SS'
+  dateFormat: 'YYYY-MM-DD',
   
   // UI language (default: based on browser language)
   language: 'en'
@@ -194,6 +195,27 @@ picker.show();
 // Hide the date picker programmatically
 picker.hide();
 ```
+
+## Date Format Patterns
+
+The component supports custom date format patterns using the following tokens:
+
+| Token | Description | Example |
+|-------|-------------|---------|
+| YYYY  | 4-digit year | 2025 |
+| YY    | 2-digit year | 25 |
+| MM    | Month (01-12) | 03 |
+| DD    | Day of month (01-31) | 09 |
+| HH    | Hours (00-23) | 13 |
+| mm    | Minutes (00-59) | 45 |
+| SS    | Seconds (00-59) | 30 |
+
+Examples:
+- `DD.MM.YYYY` → 09.03.2025
+- `MM/DD/YYYY` → 03/09/2025
+- `YYYY-MM-DD` → 2025-03-09
+- `DD.MM.YYYY HH:mm` → 09.03.2025 13:45
+- `YYYY/MM/DD HH:mm:SS` → 2025/03/09 13:45:30
 
 ## Browser Support
 

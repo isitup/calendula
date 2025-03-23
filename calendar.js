@@ -517,7 +517,7 @@ class Calendula {
     // Get the expected formatted length based on configuration
     let expectedLength = 10; // DD.MM.YYYY
     if (this.config.showTime) {
-      expectedLength += 6; // + HH:MM
+      expectedLength += 6; // + HH:mm
       if (this.config.showSeconds) {
         expectedLength += 3; // + :SS
       }
@@ -716,53 +716,17 @@ class Calendula {
   
   /**
    * Returns a formatted date template based on configuration
-   * @returns {string} Date template (e.g., "DD.MM.YYYY HH:MM:SS")
+   * @returns {string} Date template (e.g., "DD.MM.YYYY HH:mm:SS")
    */
   getFormattedDateTemplate() {
     let template = 'DD.MM.YYYY';
     if (this.config.showTime) {
-      template += ' HH:MM';
+      template += ' HH:mm';
       if (this.config.showSeconds) {
         template += ':SS';
       }
     }
     return template;
-  }
-  
-  /**
-   * Calculate cursor position after mobile input
-   * @param {number} digitCount - Number of digits entered
-   * @param {boolean} showTime - Whether time is displayed
-   * @param {boolean} showSeconds - Whether seconds are displayed
-   * @returns {number} New cursor position
-   */
-  calculateNewCursorPosition(digitCount, showTime, showSeconds) {
-    // Positions based on DD.MM.YYYY HH:MM:SS format
-    const posMap = {
-      1: 1,  // After first digit of day
-      2: 3,  // After dot following day
-      3: 4,  // After first digit of month
-      4: 6,  // After dot following month
-      5: 7,  // After first digit of year
-      6: 8,  // After second digit of year
-      7: 9,  // After third digit of year
-      8: 10, // After fourth digit of year
-    };
-    
-    if (showTime) {
-      posMap[9] = 12;  // After first digit of hour
-      posMap[10] = 13; // After second digit of hour
-      posMap[11] = 15; // After first digit of minute
-      posMap[12] = 16; // After second digit of minute
-      
-      if (showSeconds) {
-        posMap[13] = 18; // After first digit of second
-        posMap[14] = 19; // After second digit of second
-      }
-    }
-    
-    // Get the position based on digit count
-    return posMap[Math.min(digitCount, Object.keys(posMap).length)] || 0;
   }
 
   /**
@@ -1020,12 +984,14 @@ class Calendula {
     
     // Update month in the input field
     const monthString = (month + 1).toString().padStart(2, '0');
+    const format = this.getFormatString()
+    const pos = format.indexOf('MM');
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(3, monthString);
+      this.overwriteDigitsInInputWithoutFocus(pos, monthString);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(3, monthString);
+      this.overwriteDigitsInInput(pos, monthString);
     }
     
     // Call the callback if provided
@@ -1048,12 +1014,17 @@ class Calendula {
     
     // Update year in the input field
     const yearString = year.toString();
+    const format = this.getFormatString()
+    let pos = format.indexOf('YYYY');
+    if (-1 === pos) {
+      pos = format.indexOf('YY');
+    }
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(6, yearString);
+      this.overwriteDigitsInInputWithoutFocus(pos, yearString);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(6, yearString);
+      this.overwriteDigitsInInput(pos, yearString);
     }
     
     // Call the callback if provided
@@ -1076,12 +1047,14 @@ class Calendula {
 
     // Update month in the input field
     const month = (this.state.currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const format = this.getFormatString()
+    const pos = format.indexOf('MM');
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(3, month);
+      this.overwriteDigitsInInputWithoutFocus(pos, month);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(3, month);
+      this.overwriteDigitsInInput(pos, month);
     }
   }
   
@@ -1291,14 +1264,16 @@ class Calendula {
 
     // Update day in the input field without focusing if on mobile
     const dayString = day.toString().padStart(2, '0');
+    const format = this.getFormatString()
+    const pos = format.indexOf('DD');
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(0, dayString);
+      this.overwriteDigitsInInputWithoutFocus(pos, dayString);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(0, dayString);
+      this.overwriteDigitsInInput(pos, dayString);
     }
-    
+
     // Hide calendar after date selection (only if time is not shown)
     if (!this.config.showTime) {
       this.hideDatePicker();
@@ -1352,12 +1327,14 @@ class Calendula {
 
     // Update hours in the input field
     const hourString = hour.toString().padStart(2, '0');
+    const format = this.getFormatString()
+    const pos = format.indexOf('HH');
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(11, hourString);
+      this.overwriteDigitsInInputWithoutFocus(pos, hourString);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(11, hourString);
+      this.overwriteDigitsInInput(pos, hourString);
     }
 
     // Call the callback if specified
@@ -1410,12 +1387,14 @@ class Calendula {
 
     // Update minutes in the input field
     const minuteString = (minute + this.state.selectedMinute).toString().padStart(2, '0');
+    const format = this.getFormatString()
+    const pos = format.indexOf('mm');
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(14, minuteString);
+      this.overwriteDigitsInInputWithoutFocus(pos, minuteString);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(14, minuteString);
+      this.overwriteDigitsInInput(pos, minuteString);
     }
 
     // Call the callback if specified
@@ -1482,7 +1461,9 @@ class Calendula {
   selectMinute(minute) {
     // Check if we're on mobile
     const isMobile = this.isMobileDevice();
-    
+
+    const format = this.getFormatString()
+    const pos = format.indexOf('mm');
     if (this.config.minuteStep === 1) {
       // Standard mode - store tens and units separately
       this.state.selectedMinute = minute;
@@ -1497,10 +1478,10 @@ class Calendula {
       const minuteString = (this.state.selectedTenMinute + minute).toString().padStart(2, '0');
       if (isMobile) {
         // For mobile, update value without changing focus
-        this.overwriteDigitsInInputWithoutFocus(14, minuteString);
+        this.overwriteDigitsInInputWithoutFocus(pos, minuteString);
       } else {
         // For desktop, use normal behavior with focus
-        this.overwriteDigitsInInput(14, minuteString);
+        this.overwriteDigitsInInput(pos, minuteString);
       }
     } else {
       // Step mode - set minutes directly
@@ -1517,10 +1498,10 @@ class Calendula {
       const minuteString = minute.toString().padStart(2, '0');
       if (isMobile) {
         // For mobile, update value without changing focus
-        this.overwriteDigitsInInputWithoutFocus(14, minuteString);
+        this.overwriteDigitsInInputWithoutFocus(pos, minuteString);
       } else {
         // For desktop, use normal behavior with focus
-        this.overwriteDigitsInInput(14, minuteString);
+        this.overwriteDigitsInInput(pos, minuteString);
       }
     }
 
@@ -1572,12 +1553,14 @@ class Calendula {
 
     // Update seconds in the input field
     const secondString = second.toString().padStart(2, '0');
+    const format = this.getFormatString()
+    const pos = format.indexOf('SS');
     if (isMobile) {
       // For mobile, update value without changing focus
-      this.overwriteDigitsInInputWithoutFocus(17, secondString);
+      this.overwriteDigitsInInputWithoutFocus(pos, secondString);
     } else {
       // For desktop, use normal behavior with focus
-      this.overwriteDigitsInInput(17, secondString);
+      this.overwriteDigitsInInput(pos, secondString);
     }
 
     // Call the callback if provided
@@ -1769,73 +1752,201 @@ class Calendula {
    * Updates the input field value based on the selected date
    */
   updateDateInput() {
-    // If a custom format is specified, use it
-    if (this.config.dateFormat) {
-      try {
-        // Use custom format (implementation would depend on specific formatting library)
-        // For now, we'll use the Intl.DateTimeFormat API as a simple example
-        const dateTimeFormat = this.createDateTimeFormatter();
-        this.elements.dateInput.value = dateTimeFormat.format(this.state.selectedDate);
-        return;
-      } catch (error) {
-        console.error('Error formatting date with custom format:', error);
-        // Fall back to default formatting
-      }
-    }
-    
-    // Default formatting (DD.MM.YYYY HH:MM:SS)
-    // Formatting Basic Date and Time Components
-    const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
-    const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
-    const year = this.state.selectedDate.getFullYear();
-    const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
-    const minutes = this.state.selectedDate.getMinutes().toString().padStart(2, '0');
+    try {
+      // Get appropriate format string
+      let formatString = this.getFormatString();
 
-    // Format with or without time depending on the settings
-    if (this.config.showTime) {
-      // Format with or without seconds depending on the settings
-      if (this.config.showSeconds) {
-        // Format with seconds (DD.MM.YYYY HH:MM:SS)
-        const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
-        this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+      // Format the date using our pattern
+      this.elements.dateInput.value = this.formatDateWithPattern(this.state.selectedDate, formatString);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      
+      // Fall back to default formatting
+      const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
+      const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
+      const year = this.state.selectedDate.getFullYear();
+      const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
+      const minutes = this.state.selectedDate.getMinutes().toString().padStart(2, '0');
+
+      // Format with or without time depending on the settings
+      if (this.config.showTime) {
+        // Format with or without seconds depending on the settings
+        if (this.config.showSeconds) {
+          // Format with seconds (DD.MM.YYYY HH:mm:SS)
+          const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
+          this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+        } else {
+          // Format without seconds (DD.MM.YYYY HH:mm)
+          this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
       } else {
-        // Format without seconds (DD.MM.YYYY HH:MM)
-        this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}`;
+        // Format without seconds (DD.MM.YYYY)
+        this.elements.dateInput.value = `${day}.${month}.${year}`;
       }
-    } else {
-      // Format without seconds (DD.MM.YYYY)
-      this.elements.dateInput.value = `${day}.${month}.${year}`;
     }
   }
   
   /**
-   * Creates a date-time formatter based on current configuration
-   * @returns {Intl.DateTimeFormat} DateTimeFormat object
+   * Gets the appropriate format string based on config
+   * @returns {string} Format string
    */
-  createDateTimeFormatter() {
-    const options = {};
-    
-    // Always include day, month, year for date part
-    options.day = '2-digit';
-    options.month = '2-digit';
-    options.year = 'numeric';
-    
-    // Add time components if enabled
-    if (this.config.showTime) {
-      options.hour = '2-digit';
-      options.minute = '2-digit';
-      
-      // Add seconds if enabled
-      if (this.config.showSeconds) {
-        options.second = '2-digit';
-      }
-      
-      // Use 24-hour format
-      options.hour12 = false;
+  getFormatString() {
+    // If custom format specified, use it
+    if (this.config.dateFormat) {
+      return this.config.dateFormat;
     }
     
-    // Create formatter using specified locale or browser default
-    return new Intl.DateTimeFormat(this.config.dateFormat, options);
+    // Otherwise, create default format pattern based on settings
+    let format = 'DD.MM.YYYY';
+    if (this.config.showTime) {
+      format += ' HH:mm';
+      if (this.config.showSeconds) {
+        format += ':SS';
+      }
+    }
+    
+    return format;
+  }
+  
+  /**
+   * Formats a date according to the specified format string
+   * @param {Date} date - The date to format
+   * @param {string} format - Format string (e.g., 'YYYY-MM-DD', 'DD.MM.YYYY')
+   * @returns {string} Formatted date string
+   */
+  formatDateWithPattern(date, format) {
+    if (!date || !(date instanceof Date)) {
+      return '';
+    }
+    
+    // Get date components with proper padding
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    
+    // Replace patterns in format string
+    let result = format
+      .replace(/YYYY/g, year)
+      .replace(/YY/g, year.slice(-2))
+      .replace(/MM/g, month)
+      .replace(/DD/g, day)
+      .replace(/HH/g, hours)
+      .replace(/mm/g, minutes)
+      .replace(/SS/g, seconds);
+    
+    return result;
+  }
+  
+  /**
+   * Parses a date string according to the specified format
+   * @param {string} dateStr - The date string to parse
+   * @param {string} format - Format string (e.g., 'YYYY-MM-DD', 'DD.MM.YYYY')
+   * @returns {Date|null} A Date object or null if parsing fails
+   */
+  parseDateFromPattern(dateStr, format) {
+    if (!dateStr || !format) {
+      return null;
+    }
+    
+    // Create a map of format parts to regex patterns
+    const patterns = {
+      'YYYY': '(\\d{4})',
+      'YY': '(\\d{2})',
+      'MM': '(\\d{1,2})',
+      'DD': '(\\d{1,2})',
+      'HH': '(\\d{1,2})',
+      'mm': '(\\d{1,2})',
+      'SS': '(\\d{1,2})'
+    };
+    
+    // Escape special RegExp characters in the format
+    let escapedFormat = format.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Replace format patterns with capture groups
+    Object.keys(patterns).forEach(pattern => {
+      escapedFormat = escapedFormat.replace(new RegExp(pattern, 'g'), patterns[pattern]);
+    });
+    
+    // Create regex from format
+    const regex = new RegExp(`^${escapedFormat}$`);
+    const match = dateStr.match(regex);
+    if (!match) {
+      return null;
+    }
+    
+    // Extract values using original format as a guide
+    let year = new Date().getFullYear();
+    let month = 0;
+    let day = 1;
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+    
+    // Find positions of patterns in format
+    let valueIndex = 1; // Start from index 1 (regex group 0 is the full match)
+    
+    // Check for each pattern and extract accordingly
+    if (format.includes('YYYY')) {
+      const pos = format.indexOf('YYYY');
+      year = parseInt(dateStr.substring(pos, pos + 'YYYY'.length), 10)
+    } else if (format.includes('YY')) {
+      const pos = format.indexOf('YY');
+      const twoDigitYear = parseInt(dateStr.substring(pos, pos + 'YY'.length))
+      const currentYear = new Date().getFullYear().toString();
+      const century = parseInt(currentYear.slice(0, 2), 10) * 100;
+      year = century + twoDigitYear;
+    }
+    
+    if (format.includes('MM')) {
+      const pos = format.indexOf('MM');
+      month = parseInt(dateStr.substring(pos, pos + 'MM'.length), 10) - 1
+    }
+    
+    if (format.includes('DD')) {
+      const pos = format.indexOf('DD');
+      day = parseInt(dateStr.substring(pos, pos + 'DD'.length), 10)
+    }
+    
+    if (format.includes('HH')) {
+      const pos = format.indexOf('HH');
+      hours = parseInt(dateStr.substring(pos, pos + 'HH'.length), 10)
+    }
+    
+    if (format.includes('mm')) {
+      const pos = format.indexOf('mm');
+      minutes = parseInt(dateStr.substring(pos, pos + 'mm'.length), 10)
+    }
+    
+    if (format.includes('SS')) {
+      const pos = format.indexOf('SS');
+      seconds = parseInt(dateStr.substring(pos, pos + 'SS'.length), 10)
+    }
+
+    // Create and return the date
+    return new Date(year, month, day, hours, minutes, seconds);
+  }
+
+  /**
+   * Gets the default format pattern based on configuration
+   * @returns {string} Format pattern
+   */
+  getDefaultFormatPattern() {
+    if (this.config.dateFormat) {
+      return this.config.dateFormat;
+    }
+    
+    let format = 'DD.MM.YYYY';
+    if (this.config.showTime) {
+      format += ' HH:mm';
+      if (this.config.showSeconds) {
+        format += ':SS';
+      }
+    }
+    
+    return format;
   }
 
   /**
@@ -1850,21 +1961,23 @@ class Calendula {
     // Let's try to parse the date from the format
     let newDate;
     
-    // If a custom format is specified, let's try to use it for parsing
-    if (this.config.dateFormat) {
-      try {
-        // For simplicity, we use the Date constructor taking into account the user's locale.
-        newDate = new Date(inputValue);
-      } catch (error) {
-        console.error('Error parsing date with custom format:', error);
-        // If it doesn't work, try standard formats
+    // Get the current format string to use for parsing
+    const formatString = this.getFormatString();
+
+    try {
+      // Try to parse using our new pattern-based parser
+      newDate = this.parseDateFromPattern(inputValue, formatString);
+
+      // If that fails, fall back to standard format
+      if (!newDate) {
         newDate = this.parseDateFromStandardFormat(inputValue);
       }
-    } else {
-      // We use standard formats
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      // Try standard formats as a last resort
       newDate = this.parseDateFromStandardFormat(inputValue);
     }
-    
+
     // Check that the date is correct
     if (newDate && !isNaN(newDate.getTime())) {
       // We update all states
@@ -1907,7 +2020,7 @@ class Calendula {
   }
   
   /**
-   * Parses date from standard format DD.MM.YYYY [HH:MM[:SS]]
+   * Parses date from standard format DD.MM.YYYY [HH:mm[:SS]]
    * @param {string} inputValue - Date string
    * @returns {Date|null} A Date object or null if parsing fails
    */

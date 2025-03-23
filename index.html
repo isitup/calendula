@@ -135,11 +135,10 @@
       <label for="dateFormatSelect">Date Format:</label>
       <select id="dateFormatSelect">
         <option value="">Default (DD.MM.YYYY)</option>
-        <option value="en-US">US (MM/DD/YYYY)</option>
-        <option value="en-GB">UK (MM/DD/YYYY)</option>
-        <option value="ru-RU">Russian (MM.DD.YYYY)</option>
-        <option value="ja-JP">Japanese (YYYY/MM/DD)</option>
-        <option value="sr-RS">Serbian (MM.DD.YYYY.)</option>
+        <option value="MM/DD/YYYY HH:mm">US (MM/DD/YYYY)</option>
+        <option value="MM.DD.YYYY HH:mm">Russian (MM.DD.YYYY)</option>
+        <option value="YYYY/MM/DD HH:mm">Japanese (YYYY/MM/DD)</option>
+        <option value="MM.DD.YYYY. HH:mm">Serbian (MM.DD.YYYY.)</option>
       </select>
     </div>
     <div class="config-item" style="display: none">
@@ -193,7 +192,8 @@
         minuteStep: 5,
         initialDate: new Date(),
         // Date format (optional)
-        // dateFormat: 'en-US', // To use the format with the American locale
+        // dateFormat: 'MM/DD/YYYY HH:mm', // To use the format with the American locale
+        // dateFormat: "YYYY-MM-DD HH:mm",
         onChange: function(selectedDate) {
           console.log('Selected date changed:', selectedDate);
         }
