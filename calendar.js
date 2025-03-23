@@ -1093,13 +1093,17 @@ class Calendula {
     
     // Make sure the date picker is visible
     this.datePickerElement.style.display = 'flex';
-    
+    void this.datePickerElement.style.inset;
+
     // For Safari: force a reflow to ensure proper dimensions before calculating position
     void this.datePickerElement.offsetHeight;
     
     // Calculate and set position
     this.updateDatePickerPosition();
-    
+
+    // Fix behavior in Chrome - do not let set strange inset
+    this.datePickerElement.style.inset = '';
+
     // Trigger a callback if defined
     if (typeof this.config.onOpen === 'function') {
       this.config.onOpen();
