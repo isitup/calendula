@@ -73,7 +73,6 @@
   width: 100%;
   max-width: 550px;
   margin: 0 auto;
-  z-index: 100; /* Ensure the dropdown appears above other content */
 }
 
 @media (max-width: 540px) {
