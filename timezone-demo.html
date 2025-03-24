@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Calendula - Timezone Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    
+    .timezone-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .timezone-card {
+      flex: 1;
+      min-width: 250px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .timezone-card h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #444;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+    }
+    
+    .timezone-card label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .timezone-card input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    
+    .timezone-name {
+      background-color: #f5f5f5;
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    /* Timezone indicator */
+    .timezone-indicator {
+      display: inline-block;
+      background-color: #e2f0ff;
+      color: #0055aa;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+    
+    .custom-section {
+      background-color: #f0f7ff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .custom-timezone {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .custom-timezone select {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .custom-timezone button {
+      padding: 0 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .info-panel {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 40px;
+    }
+    
+    .info-panel h3 {
+      margin-bottom: 10px;
+    }
+    
+    .current-time {
+      background-color: #eaf5ea;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 16px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    
+    #syncTimezone {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #4a86e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Timezone Support Demo</h1>
+    
+    <div class="current-time">
+      Current local time: <span id="localTime"></span>
+    </div>
+    
+    <div class="timezone-demo">
+      <!-- Local Timezone -->
+      <div class="timezone-card">
+        <h2>Local Timezone</h2>
+        <div class="timezone-name" id="localTzName">Your timezone</div>
+        <label for="localDate">Date & Time: <span id="localTzIndicator" class="timezone-indicator"></span></label>
+        <input type="text" id="localDate" placeholder="Local date and time">
+      </div>
+      
+      <!-- New York Timezone -->
+      <div class="timezone-card">
+        <h2>New York (EST/EDT)</h2>
+        <div class="timezone-name">America/New_York</div>
+        <label for="nyDate">Date & Time: <span id="nyTzIndicator" class="timezone-indicator">EDT</span></label>
+        <input type="text" id="nyDate" placeholder="New York date and time">
+      </div>
+      
+      <!-- London Timezone -->
+      <div class="timezone-card">
+        <h2>London (GMT/BST)</h2>
+        <div class="timezone-name">Europe/London</div>
+        <label for="londonDate">Date & Time: <span id="londonTzIndicator" class="timezone-indicator">BST</span></label>
+        <input type="text" id="londonDate" placeholder="London date and time">
+      </div>
+    </div>
+    
+    <div class="timezone-demo">
+      <!-- Tokyo Timezone -->
+      <div class="timezone-card">
+        <h2>Tokyo (JST)</h2>
+        <div class="timezone-name">Asia/Tokyo</div>
+        <label for="tokyoDate">Date & Time: <span id="tokyoTzIndicator" class="timezone-indicator">JST</span></label>
+        <input type="text" id="tokyoDate" placeholder="Tokyo date and time">
+      </div>
+      
+      <!-- Sydney Timezone -->
+      <div class="timezone-card">
+        <h2>Sydney (AEST/AEDT)</h2>
+        <div class="timezone-name">Australia/Sydney</div>
+        <label for="sydneyDate">Date & Time: <span id="sydneyTzIndicator" class="timezone-indicator">AEST</span></label>
+        <input type="text" id="sydneyDate" placeholder="Sydney date and time">
+      </div>
+    </div>
+    
+    <button id="syncTimezone">Synchronize All Calendars to Current Time</button>
+    
+    <div class="custom-section">
+      <h2>Custom Timezone</h2>
+      <p>Select a timezone to use with the calendar:</p>
+      
+      <div class="custom-timezone">
+        <select id="timezoneSelect">
+          <option value="">-- Select Timezone --</option>
+          <optgroup label="Common Timezones">
+            <option value="UTC">UTC (Coordinated Universal Time)</option>
+            <option value="America/New_York">America/New_York (Eastern Time)</option>
+            <option value="America/Chicago">America/Chicago (Central Time)</option>
+            <option value="America/Denver">America/Denver (Mountain Time)</option>
+            <option value="America/Los_Angeles">America/Los_Angeles (Pacific Time)</option>
+            <option value="Europe/London">Europe/London (GMT/BST)</option>
+            <option value="Europe/Paris">Europe/Paris (Central European Time)</option>
+            <option value="Europe/Moscow">Europe/Moscow (Moscow Time)</option>
+            <option value="Asia/Tokyo">Asia/Tokyo (Japan Time)</option>
+            <option value="Asia/Shanghai">Asia/Shanghai (China Time)</option>
+            <option value="Asia/Kolkata">Asia/Kolkata (India Time)</option>
+            <option value="Australia/Sydney">Australia/Sydney (Eastern Australia Time)</option>
+          </optgroup>
+        </select>
+        <button id="applyTimezone">Apply</button>
+      </div>
+      
+      <label for="customDate" style="margin-top: 15px;">Date & Time with Custom Timezone: <span id="customTzIndicator" class="timezone-indicator"></span></label>
+      <input type="text" id="customDate" placeholder="Date with custom timezone">
+    </div>
+    
+    <div class="info-panel">
+      <h3>About Timezone Support</h3>
+      <p>The calendar now supports displaying dates and times in various timezones. When you set a timezone, the calendar will:</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li>Display times in the selected timezone</li>
+        <li>Internally store dates in the selected timezone</li>
+        <li>Convert input dates from local time to the selected timezone</li>
+        <li>Return dates in the selected timezone when using getDate()</li>
+      </ul>
+      <p style="margin-top: 10px;">This is useful for applications that need to coordinate times across different regions, or when scheduling events in distant timezones.</p>
+      <p style="margin-top: 10px;"><strong>Note:</strong> In this demo, we display the timezone abbreviation (like EDT, GMT, JST) separately from the input field to maintain proper input field behavior.</p>
+    </div>
+  </div>
+  
+  <script src="translations.js"></script>
+  <script src="calendar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Update local time display
+      function updateLocalTime() {
+        const localTimeEl = document.getElementById('localTime');
+        const now = new Date();
+        localTimeEl.textContent = now.toLocaleString();
+      }
+      
+      // Update local timezone name
+      function updateLocalTimezoneName() {
+        const localTzName = document.getElementById('localTzName');
+        try {
+          const formatter = new Intl.DateTimeFormat();
+          const options = formatter.resolvedOptions();
+          localTzName.textContent = options.timeZone || 'Local timezone';
+          
+          // Update local timezone indicator
+          document.getElementById('localTzIndicator').textContent = getTimezoneAbbr(null);
+        } catch (e) {
+          localTzName.textContent = 'Local timezone';
+        }
+      }
+      
+      // Get timezone abbreviation
+      function getTimezoneAbbr(timezone) {
+        try {
+          const now = new Date();
+          const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone || undefined,
+            timeZoneName: 'short'
+          });
+          const parts = formatter.formatToParts(now);
+          const tzPart = parts.find(part => part.type === 'timeZoneName');
+          return tzPart ? tzPart.value : '';
+        } catch (e) {
+          return '';
+        }
+      }
+      
+      // Update timezone indicators
+      function updateTimezoneIndicators() {
+        document.getElementById('nyTzIndicator').textContent = getTimezoneAbbr('America/New_York');
+        document.getElementById('londonTzIndicator').textContent = getTimezoneAbbr('Europe/London');
+        document.getElementById('tokyoTzIndicator').textContent = getTimezoneAbbr('Asia/Tokyo');
+        document.getElementById('sydneyTzIndicator').textContent = getTimezoneAbbr('Australia/Sydney');
+        
+        // Update custom timezone indicator if set
+        const customTz = document.getElementById('timezoneSelect').value;
+        if (customTz) {
+          document.getElementById('customTzIndicator').textContent = getTimezoneAbbr(customTz);
+        } else {
+          document.getElementById('customTzIndicator').textContent = '';
+        }
+      }
+      
+      // Update local time every second
+      updateLocalTime();
+      updateLocalTimezoneName();
+      updateTimezoneIndicators();
+      setInterval(updateLocalTime, 1000);
+      
+      // Initialize calendars with different timezones
+      const localCalendar = new Calendula(document.getElementById('localDate'), {
+        showTime: true,
+        showSeconds: true,
+        dateFormat: 'DD.MM.YYYY HH:mm:SS',
+        initialDate: new Date()
+      });
+      
+      const nyCalendar = new Calendula(document.getElementById('nyDate'), {
+        showTime: true,
+        showSeconds: true,
+        dateFormat: 'DD.MM.YYYY HH:mm:SS',
+        timezone: 'America/New_York',
+        initialDate: new Date()
+      });
+      
+      const londonCalendar = new Calendula(document.getElementById('londonDate'), {
+        showTime: true,
+        showSeconds: true,
+        dateFormat: 'DD.MM.YYYY HH:mm:SS',
+        timezone: 'Europe/London',
+        initialDate: new Date()
+      });
+      
+      const tokyoCalendar = new Calendula(document.getElementById('tokyoDate'), {
+        showTime: true,
+        showSeconds: true,
+        dateFormat: 'DD.MM.YYYY HH:mm:SS',
+        timezone: 'Asia/Tokyo',
+        initialDate: new Date()
+      });
+      
+      const sydneyCalendar = new Calendula(document.getElementById('sydneyDate'), {
+        showTime: true,
+        showSeconds: true,
+        dateFormat: 'DD.MM.YYYY HH:mm:SS',
+        timezone: 'Australia/Sydney',
+        initialDate: new Date()
+      });
+      
+      // Custom timezone calendar
+      const customCalendar = new Calendula(document.getElementById('customDate'), {
+        showTime: true,
+        showSeconds: true,
+        dateFormat: 'DD.MM.YYYY HH:mm:SS',
+        initialDate: new Date()
+      });
+      
+      // Apply selected timezone to custom calendar
+      document.getElementById('applyTimezone').addEventListener('click', function() {
+        const timezoneSelect = document.getElementById('timezoneSelect');
+        const selectedTimezone = timezoneSelect.value;
+        
+        if (selectedTimezone) {
+          customCalendar.setConfig({
+            timezone: selectedTimezone
+          });
+          
+          // Update custom timezone indicator
+          document.getElementById('customTzIndicator').textContent = getTimezoneAbbr(selectedTimezone);
+        } else {
+          alert('Please select a timezone first');
+        }
+      });
+      
+      // Synchronize all calendars to current time
+      document.getElementById('syncTimezone').addEventListener('click', function() {
+        const now = new Date();
+        
+        localCalendar.setDate(now);
+        nyCalendar.setDate(now);
+        londonCalendar.setDate(now);
+        tokyoCalendar.setDate(now);
+        sydneyCalendar.setDate(now);
+        
+        const customTimezone = document.getElementById('timezoneSelect').value;
+        if (customTimezone) {
+          customCalendar.setDate(now);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

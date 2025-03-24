@@ -46,8 +46,9 @@ class Calendula {
       initialDate: options.initialDate || new Date(),
       inputField: input, // Use the provided input element directly
       onChange: options.onChange || null,
-      dateFormat: options.dateFormat || null, // Date format (for example, 'dd.MM.yyyy')
-      language: options.language || this.detectBrowserLanguage() // Interface language
+      dateFormat: options.dateFormat || null, // Date format (for example, 'YYYY-MM-DD')
+      language: options.language || this.detectBrowserLanguage(), // Interface language
+      timezone: options.timezone || null // Timezone for displaying dates (e.g., 'Europe/London', 'America/New_York')
     };
 
     // Internal state
@@ -1724,25 +1725,37 @@ class Calendula {
     try {
       // Get appropriate format string
       let formatString = this.getFormatString();
+      
+      // Get the date potentially adjusted for timezone
+      const dateToFormat = this.config.timezone ? 
+        this.getTimezoneAdjustedDate() : 
+        this.state.selectedDate;
 
       // Format the date using our pattern
-      this.elements.dateInput.value = this.formatDateWithPattern(this.state.selectedDate, formatString);
+      this.elements.dateInput.value = this.formatDateWithPattern(dateToFormat, formatString);
     } catch (error) {
       console.error('Error formatting date:', error);
       
       // Fall back to default formatting
-      const day = this.state.selectedDate.getDate().toString().padStart(2, '0');
-      const month = (this.state.selectedDate.getMonth() + 1).toString().padStart(2, '0');
-      const year = this.state.selectedDate.getFullYear();
-      const hours = this.state.selectedDate.getHours().toString().padStart(2, '0');
-      const minutes = this.state.selectedDate.getMinutes().toString().padStart(2, '0');
+      let dateToUse = this.state.selectedDate;
+      
+      // Adjust for timezone if necessary
+      if (this.config.timezone) {
+        dateToUse = this.getTimezoneAdjustedDate();
+      }
+      
+      const day = dateToUse.getDate().toString().padStart(2, '0');
+      const month = (dateToUse.getMonth() + 1).toString().padStart(2, '0');
+      const year = dateToUse.getFullYear();
+      const hours = dateToUse.getHours().toString().padStart(2, '0');
+      const minutes = dateToUse.getMinutes().toString().padStart(2, '0');
 
       // Format with or without time depending on the settings
       if (this.config.showTime) {
         // Format with or without seconds depending on the settings
         if (this.config.showSeconds) {
           // Format with seconds (DD.MM.YYYY HH:mm:SS)
-          const seconds = this.state.selectedDate.getSeconds().toString().padStart(2, '0');
+          const seconds = dateToUse.getSeconds().toString().padStart(2, '0');
           this.elements.dateInput.value = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
         } else {
           // Format without seconds (DD.MM.YYYY HH:mm)
@@ -1775,6 +1788,132 @@ class Calendula {
     }
     
     return format;
+  }
+  
+  /**
+   * Converts a date to the specified timezone
+   * @param {Date} date - Date to convert
+   * @param {string} timezone - Target timezone (e.g., 'Europe/London')
+   * @returns {Date} Converted date
+   */
+  convertToTimezone(date, timezone) {
+    if (!timezone) {
+      return new Date(date);
+    }
+    
+    try {
+      // Create a formatter with the target timezone
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false
+      });
+      
+      // Get the parts of the formatted date
+      const parts = formatter.formatToParts(date);
+      const dateParts = {};
+      
+      // Extract date parts
+      parts.forEach(part => {
+        if (part.type !== 'literal') {
+          dateParts[part.type] = parseInt(part.value, 10);
+        }
+      });
+      
+      // Create a new date with the timezone-adjusted values
+      // Note: Month is 0-indexed in JavaScript Date
+      return new Date(
+        dateParts.year,
+        dateParts.month - 1,
+        dateParts.day,
+        dateParts.hour,
+        dateParts.minute,
+        dateParts.second
+      );
+    } catch (error) {
+      console.error('Error converting to timezone:', error);
+      return new Date(date);
+    }
+  }
+  
+  /**
+   * Converts a date from the specified timezone to local time
+   * @param {Date} date - Date in the specified timezone
+   * @param {string} timezone - Source timezone (e.g., 'Europe/London')
+   * @returns {Date} Date in local time
+   */
+  convertFromTimezone(date, timezone) {
+    if (!timezone) {
+      return new Date(date);
+    }
+    
+    try {
+      // Get the local time components
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const seconds = date.getSeconds();
+      
+      // Create a formatter to get the source timezone's current offset
+      const sourceTZ = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        timeZoneName: 'short'
+      });
+      const localTZ = new Intl.DateTimeFormat('en-US', {
+        timeZoneName: 'short'
+      });
+      
+      // Create a date string in ISO format to specify the timezone
+      const sourceTZDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+      
+      // Calculate the offset between source timezone and local timezone
+      const sourceOffset = this.getTimezoneOffset(timezone, sourceTZDate);
+      const localOffset = new Date().getTimezoneOffset();
+      const offsetDiff = sourceOffset + localOffset;
+      
+      // Apply the offset difference to the date
+      const localDate = new Date(sourceTZDate.getTime() + offsetDiff * 60 * 1000);
+      return localDate;
+    } catch (error) {
+      console.error('Error converting from timezone:', error);
+      return new Date(date);
+    }
+  }
+  
+  /**
+   * Gets the timezone offset in minutes for a specific timezone and date
+   * @param {string} timezone - Timezone (e.g., 'Europe/London')
+   * @param {Date} date - Date to get offset for
+   * @returns {number} Offset in minutes
+   */
+  getTimezoneOffset(timezone, date) {
+    try {
+      const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+      const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+      return (utcDate.getTime() - tzDate.getTime()) / 60000;
+    } catch (error) {
+      console.error('Error getting timezone offset:', error);
+      return 0;
+    }
+  }
+  
+  /**
+   * Gets the date adjusted for the configured timezone
+   * @returns {Date} Timezone-adjusted date
+   */
+  getTimezoneAdjustedDate() {
+    if (!this.config.timezone) {
+      return new Date(this.state.selectedDate);
+    }
+    
+    return this.convertToTimezone(this.state.selectedDate, this.config.timezone);
   }
   
   /**
@@ -2040,27 +2179,47 @@ class Calendula {
 
   /**
    * Gets the selected date
+   * @param {Object} options - Options for date retrieval
+   * @param {boolean} options.useLocalTimezone - Whether to convert from calendar timezone to local timezone
    * @returns {Date} Selected date
    */
-  getDate() {
-    return new Date(this.state.selectedDate);
+  getDate(options = {}) {
+    // Get a copy of the selected date
+    const date = new Date(this.state.selectedDate);
+    
+    // If we have a timezone configured and need to convert to local time
+    if (this.config.timezone && options.useLocalTimezone) {
+      return this.convertFromTimezone(date, this.config.timezone);
+    }
+    
+    return date;
   }
 
   /**
    * Sets the date
-   * @param {Date} date - New date
+   * @param {Date} date - New date (in local timezone unless specified otherwise)
+   * @param {Object} options - Additional options
+   * @param {boolean} options.isTimezoneDate - Whether the date is already in the configured timezone
    */
-  setDate(date) {
+  setDate(date, options = {}) {
     if (!(date instanceof Date) || isNaN(date.getTime())) {
       throw new Error('Calendula: Invalid date');
     }
+    
+    let adjustedDate = date;
+    
+    // If we have a timezone configured and the provided date is not already in that timezone
+    if (this.config.timezone && !options.isTimezoneDate) {
+      // Convert the provided date to the configured timezone
+      adjustedDate = this.convertToTimezone(date, this.config.timezone);
+    }
 
-    this.state.currentDate = new Date(date);
-    this.state.selectedDate = new Date(date);
-    this.state.selectedHour = date.getHours();
-    this.state.selectedTenMinute = Math.floor(date.getMinutes() / 10) * 10;
-    this.state.selectedMinute = date.getMinutes() % 10;
-    this.state.selectedSecond = date.getSeconds();
+    this.state.currentDate = new Date(adjustedDate);
+    this.state.selectedDate = new Date(adjustedDate);
+    this.state.selectedHour = adjustedDate.getHours();
+    this.state.selectedTenMinute = Math.floor(adjustedDate.getMinutes() / 10) * 10;
+    this.state.selectedMinute = adjustedDate.getMinutes() % 10;
+    this.state.selectedSecond = adjustedDate.getSeconds();
 
     // Redraw all components
     this.renderCalendarDays();
@@ -2086,6 +2245,7 @@ class Calendula {
    */
   setConfig(config) {
     let languageChanged = false;
+    let timezoneChanged = false;
     
     if (config.showTime !== undefined) {
       this.config.showTime = config.showTime;
@@ -2112,6 +2272,23 @@ class Calendula {
       if (this.config.language !== config.language) {
         this.config.language = config.language;
         languageChanged = true;
+      }
+    }
+    
+    if (config.timezone !== undefined) {
+      // Check if timezone has actually changed
+      if (this.config.timezone !== config.timezone) {
+        // Save current date before timezone change
+        const currentDate = this.getDate({ useLocalTimezone: true });
+        
+        // Update timezone
+        this.config.timezone = config.timezone;
+        timezoneChanged = true;
+        
+        // Adjust the date to the new timezone
+        if (currentDate) {
+          this.setDate(currentDate);
+        }
       }
     }
     

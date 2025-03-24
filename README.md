@@ -13,6 +13,7 @@ No dependencies required!
 - Date and time selection with configurable time steps
 - 18 languages supported out of the box
 - Light and dark themes included
+- Timezone support for international date/time handling
 - Mobile-friendly design
 - Customizable date formats
 - Easy integration with any project
@@ -147,7 +148,11 @@ const picker = new Calendula(document.getElementById('dateInput'), {
   dateFormat: 'YYYY-MM-DD',
   
   // UI language (default: based on browser language)
-  language: 'en'
+  language: 'en',
+  
+  // Timezone for displaying and handling dates (default: local timezone)
+  // Examples: 'America/New_York', 'Europe/London', 'Asia/Tokyo', 'UTC'
+  timezone: 'Europe/Paris'
 });
 ```
 
@@ -216,6 +221,41 @@ Examples:
 - `YYYY-MM-DD` → 2025-03-09
 - `DD.MM.YYYY HH:mm` → 09.03.2025 13:45
 - `YYYY/MM/DD HH:mm:SS` → 2025/03/09 13:45:30
+
+## Timezone Support
+
+The component supports displaying and managing dates in different timezones:
+
+```javascript
+// Initialize with New York timezone
+const nycCalendar = new Calendula('#dateInput', {
+  showTime: true,
+  timezone: 'America/New_York'
+});
+
+// Use with London timezone
+const londonCalendar = new Calendula('#anotherInput', {
+  showTime: true,
+  timezone: 'Europe/London'
+});
+
+// Change timezone dynamically
+calendar.setConfig({
+  timezone: 'Asia/Tokyo'
+});
+
+// Get date in local timezone
+const localDate = calendar.getDate({ useLocalTimezone: true });
+
+// Set date (it will be converted to the calendar's timezone)
+calendar.setDate(new Date());
+```
+
+When a timezone is specified:
+1. Dates are displayed in the specified timezone
+2. Date values returned by the component (e.g., via onChange) are in the specified timezone
+3. Setting a date via setDate() automatically converts from local time to the specified timezone
+4. The component maintains internal date values in the configured timezone
 
 ## Browser Support
 
