@@ -2,7 +2,7 @@
  * Calendar Component Translations
  * This file contains translations for the calendar UI in multiple languages
  * 
- * @version 1.0.0
+ * @version 1.0.3
  * @license MIT
  */
 

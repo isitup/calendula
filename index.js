@@ -4,7 +4,7 @@
  * This file serves as the main entry point for importing the Calendula component
  * when the package is installed via npm.
  * 
- * @version 1.0.0
+ * @version 1.0.3
  * @license MIT
  */
 

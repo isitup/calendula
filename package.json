@@ -1,6 +1,6 @@
 {
   "name": "calendular",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A lightweight and customizable date and time picker component with multilingual support",
   "main": "index.js",
   "scripts": {

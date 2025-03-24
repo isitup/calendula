@@ -2,7 +2,7 @@
  * Calendula - Date and Time Picker Component
  * Creates an interactive calendar with time selection in the specified container
  * 
- * @version 1.0.0
+ * @version 1.0.3
  * @license MIT
  */
 
