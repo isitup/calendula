@@ -536,8 +536,6 @@ class Calendula {
       const zeros = '0'.repeat(actualDiff)
       const valueWithAddedZeros = value.substring(0, cursorPos) + zeros + value.substring(cursorPos)
       const digitsWithZeros = valueWithAddedZeros.replace(/\D/g, '');
-      console.log(digits)
-      console.log(valueWithAddedZeros)
 
       // Update input with the formatted version
       this.updateInputWithDigits(input, digitsWithZeros);
@@ -2251,7 +2249,7 @@ class Calendula {
     }
 
     this.state.currentDate = new Date(adjustedDate);
-    this.state.selectedDate = new Date(adjustedDate);
+    this.state.selectedDate = new Date(date);
     this.state.selectedHour = adjustedDate.getHours();
     this.state.selectedTenMinute = Math.floor(adjustedDate.getMinutes() / 10) * 10;
     this.state.selectedMinute = adjustedDate.getMinutes() % 10;
@@ -2315,10 +2313,10 @@ class Calendula {
       // Update timezone
       this.config.timezone = config.timezone;
     }
-    
+
     // Apply new configuration
     this.applyConfig();
-    
+
     // If language has changed, update translations and re-render everything
     if (languageChanged) {
       const lang = this.getLanguage();
