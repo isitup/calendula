@@ -2056,25 +2056,28 @@ class Calendula {
   }
 
   getTimezoneOffset(timeZoneName) {
-    // Создаем объект даты
+    // Create a date object
     const date = new Date();
 
-    // Используем Intl.DateTimeFormat для получения форматированной даты в указанной таймзоне
+    // Use Intl.DateTimeFormat to get a formatted date in a specified time zone
     const formatter = new Intl.DateTimeFormat('en-GB', {
       timeZone: timeZoneName,
       timeZoneName: 'short'
     });
 
-    // Получаем части форматированной даты
+    // Getting parts of a formatted date
     const formattedParts = formatter.formatToParts(date);
 
-    // Находим часть, содержащую информацию о таймзоне
+    // Find the part containing information about the time zone
     const timeZonePart = formattedParts.find(part => part.type === 'timeZoneName');
 
-    // Возвращаем смещение таймзоны
+    // Returning the time zone offset
     const gmtOffset = timeZonePart ? timeZonePart.value : null;
     const numberOffset = gmtOffset.replace('GMT', '');
-    const sign = numberOffset[0]
+    let sign = '+'
+    if (numberOffset.length > 0) {
+      sign = numberOffset[0]
+    }
     const valueOffset = numberOffset.substring(1)
     const parts = valueOffset.split(":")
     if (parts.length < 2) {
