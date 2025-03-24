@@ -204,6 +204,8 @@
           console.log('Selected date changed:', selectedDate);
         }
       });
+      console.log('-');
+      picker.setConfig({timezone: "Europe/London"});
 
       // Create date picker
       new Calendula(document.getElementById('calendarContainer2'), {

@@ -2120,7 +2120,6 @@ class Calendula {
       // We update all states
       this.state.currentDate = new Date(newDate);
 
-
       let dateInTZ = newDate;
       if (this.config.timezone) {
         const formattedOffset = this.getTimezoneOffset(this.config.timezone);
@@ -2313,20 +2312,8 @@ class Calendula {
     }
     
     if (config.timezone !== undefined) {
-      // Check if timezone has actually changed
-      if (this.config.timezone !== config.timezone) {
-        // Save current date before timezone change
-        const currentDate = this.getDate({ useLocalTimezone: true });
-        
-        // Update timezone
-        this.config.timezone = config.timezone;
-        timezoneChanged = true;
-        
-        // Adjust the date to the new timezone
-        if (currentDate) {
-          this.setDate(currentDate);
-        }
-      }
+      // Update timezone
+      this.config.timezone = config.timezone;
     }
     
     // Apply new configuration
