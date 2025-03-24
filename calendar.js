@@ -511,34 +511,35 @@ class Calendula {
     const value = input.value;
     const cursorPos = input.selectionStart;
 
-    // Get the template format
-    let template = this.getFormattedDateTemplate();
-    
     // Get the expected formatted length based on configuration
-    let expectedLength = 10; // DD.MM.YYYY
-    if (this.config.showTime) {
-      expectedLength += 6; // + HH:mm
-      if (this.config.showSeconds) {
-        expectedLength += 3; // + :SS
-      }
-    }
-    
+    const format = this.getFormatString();
+    let expectedLength = format.length; // For example, length of DD.MM.YYYY
+
     // Calculate difference between actual length and expected length
     const lengthDiff = value.length - expectedLength;
+
+    const signs = format.replace(/[^a-zA-Z]/g, '');
 
     // If no difference, or deletion occurred (negative difference), reset and handle normally
     if (lengthDiff <= 0) {
       // Get only the digits from the input value
       const digits = value.replace(/\D/g, '');
-      
+
       // If there are no digits, reset to default
       if (digits.length === 0) {
         this.updateDateInput();
         return;
       }
-      
+
+      const actualDiff = signs.length - digits.length
+      const zeros = '0'.repeat(actualDiff)
+      const valueWithAddedZeros = value.substring(0, cursorPos) + zeros + value.substring(cursorPos)
+      const digitsWithZeros = valueWithAddedZeros.replace(/\D/g, '');
+      console.log(digits)
+      console.log(valueWithAddedZeros)
+
       // Update input with the formatted version
-      this.updateInputWithDigits(input, digits);
+      this.updateInputWithDigits(input, digitsWithZeros);
       
       // Restore cursor position
       setTimeout(() => {
@@ -666,36 +667,19 @@ class Calendula {
    * @returns {string} Formatted date string
    */
   formatDigitsToDateString(digits) {
-    // Create a properly formatted template
-    let day = '00', month = '00', year = '0000';
-    let hours = '00', minutes = '00', seconds = '00';
-    
-    // Apply digits to template slots
-    if (digits.length >= 1) day = (digits[0] + '0').substring(0, 2);
-    if (digits.length >= 2) day = digits.substring(0, 2);
-    if (digits.length >= 3) month = (digits.substring(2, 3) + '0').substring(0, 2);
-    if (digits.length >= 4) month = digits.substring(2, 4);
-    if (digits.length >= 5) year = (digits.substring(4, 8) + '0000').substring(0, 4);
-    
-    // Handle time components if needed
-    if (this.config.showTime) {
-      if (digits.length >= 9) hours = (digits.substring(8, 10) + '00').substring(0, 2);
-      if (digits.length >= 11) minutes = (digits.substring(10, 12) + '00').substring(0, 2);
-      
-      if (this.config.showSeconds && digits.length >= 13) {
-        seconds = (digits.substring(12, 14) + '00').substring(0, 2);
+    const format = this.getFormatString()
+    let digitIndex = 0;
+    let formattedValue = '';
+    for (let i = 0; i < format.length; i++) {
+      const symbol = format.charAt(i);
+      if ('YMDHmS'.includes(symbol)) {
+        formattedValue += digits[digitIndex];
+        digitIndex++;
+      } else {
+        formattedValue += symbol;
       }
     }
-    
-    // Build the formatted date string
-    let formattedValue = `${day}.${month}.${year}`;
-    if (this.config.showTime) {
-      formattedValue += ` ${hours}:${minutes}`;
-      if (this.config.showSeconds) {
-        formattedValue += `:${seconds}`;
-      }
-    }
-    
+
     return formattedValue;
   }
   
@@ -712,21 +696,6 @@ class Calendula {
       }
     }
     return formattedValue;
-  }
-  
-  /**
-   * Returns a formatted date template based on configuration
-   * @returns {string} Date template (e.g., "DD.MM.YYYY HH:mm:SS")
-   */
-  getFormattedDateTemplate() {
-    let template = 'DD.MM.YYYY';
-    if (this.config.showTime) {
-      template += ' HH:mm';
-      if (this.config.showSeconds) {
-        template += ':SS';
-      }
-    }
-    return template;
   }
 
   /**
