@@ -328,7 +328,10 @@
         showSeconds: true,
         dateFormat: 'DD.MM.YYYY HH:mm:SS',
         timezone: 'America/New_York',
-        initialDate: new Date()
+        initialDate: new Date(),
+        onChange: function(d) {
+          console.log(d);
+        }
       });
       
       const londonCalendar = new Calendula(document.getElementById('londonDate'), {

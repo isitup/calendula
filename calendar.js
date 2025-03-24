@@ -2057,6 +2057,35 @@ class Calendula {
     return format;
   }
 
+  getTimezoneOffset(timeZoneName) {
+    // Создаем объект даты
+    const date = new Date();
+
+    // Используем Intl.DateTimeFormat для получения форматированной даты в указанной таймзоне
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: timeZoneName,
+      timeZoneName: 'short'
+    });
+
+    // Получаем части форматированной даты
+    const formattedParts = formatter.formatToParts(date);
+
+    // Находим часть, содержащую информацию о таймзоне
+    const timeZonePart = formattedParts.find(part => part.type === 'timeZoneName');
+
+    // Возвращаем смещение таймзоны
+    const gmtOffset = timeZonePart ? timeZonePart.value : null;
+    const numberOffset = gmtOffset.replace('GMT', '');
+    const sign = numberOffset[0]
+    const valueOffset = numberOffset.substring(1)
+    const parts = valueOffset.split(":")
+    if (parts.length < 2) {
+      return sign + valueOffset.padStart(2, '0') + ':00';
+    } else {
+      return sign + parts[0].padStart(2, '0') + ':' + parts[1];
+    }
+  }
+
   /**
    * Handles value change in the input field
    * @param {boolean} updateInput - Whether to update the input field after processing
@@ -2090,7 +2119,15 @@ class Calendula {
     if (newDate && !isNaN(newDate.getTime())) {
       // We update all states
       this.state.currentDate = new Date(newDate);
-      this.state.selectedDate = new Date(newDate);
+
+
+      let dateInTZ = newDate;
+      if (this.config.timezone) {
+        const formattedOffset = this.getTimezoneOffset(this.config.timezone);
+        dateInTZ = this.formatDateWithPattern(newDate, 'YYYY-MM-DD HH:mm:SS')+formattedOffset;
+      }
+
+      this.state.selectedDate = new Date(dateInTZ);
       this.state.selectedHour = newDate.getHours();
       this.state.selectedTenMinute = Math.floor(newDate.getMinutes() / 10) * 10;
       this.state.selectedMinute = newDate.getMinutes() % 10;
