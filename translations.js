@@ -27,6 +27,9 @@ const CALENDULA_TRANSLATIONS = {
       seconds: 'Seconds',
       tens: 'Tens',
       units: 'Minutes'
+    },
+    buttons: {
+      clear: 'Clear'
     }
   },
   
@@ -47,6 +50,9 @@ const CALENDULA_TRANSLATIONS = {
       seconds: 'Sekunden',
       tens: 'Zehner',
       units: 'Minuten'
+    },
+    buttons: {
+      clear: 'Löschen'
     }
   },
   
@@ -67,6 +73,9 @@ const CALENDULA_TRANSLATIONS = {
       seconds: 'Секунди',
       tens: 'Десятки',
       units: 'Хвилини'
+    },
+    buttons: {
+      clear: 'Очистити'
     }
   },
   
@@ -87,6 +96,9 @@ const CALENDULA_TRANSLATIONS = {
       seconds: 'Секунды',
       tens: 'Десятки',
       units: 'Минуты'
+    },
+    buttons: {
+      clear: 'Очистить'
     }
   },
   
@@ -107,6 +119,9 @@ const CALENDULA_TRANSLATIONS = {
       seconds: 'Secondes',
       tens: 'Dizaines',
       units: 'Minutes'
+    },
+    buttons: {
+      clear: 'Effacer'
     }
   },
   
@@ -127,6 +142,9 @@ const CALENDULA_TRANSLATIONS = {
       seconds: 'Segundos',
       tens: 'Decenas',
       units: 'Minutos'
+    },
+    buttons: {
+      clear: 'Borrar'
     }
   },
   

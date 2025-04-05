@@ -132,6 +132,10 @@
       <input type="checkbox" id="showSecondsCheckbox" checked>
     </div>
     <div class="config-item">
+      <label for="allowEmptyCheckbox">Allow Empty:</label>
+      <input type="checkbox" id="allowEmptyCheckbox">
+    </div>
+    <div class="config-item">
       <label for="dateFormatSelect">Date Format:</label>
       <select id="dateFormatSelect">
         <option value="">Default (DD.MM.YYYY)</option>
@@ -183,8 +187,9 @@
   <h2>More examples</h2>
 
   <p><a href="date-format-demo.html">Date Format Patterns Demo</a></p>
-  <p><a href="theme-demo.html">Date Format Patterns Demo</a></p>
+  <p><a href="theme-demo.html">Theme Demo</a></p>
   <p><a href="timezone-demo.html">Timezone Support Demo</a></p>
+  <p><a href="empty-value-demo.html">Empty Value Support Demo</a></p>
 
 </div>
   <script src="translations.js"></script>
@@ -212,12 +217,14 @@
         showTime: false,
         initialDate: new Date(),
         language: 'zh',
+        allowEmpty: true, // Enable empty value support for this calendar
       });
 
       // Setup config controls
       const showTimeCheckbox = document.getElementById('showTimeCheckbox');
       const minuteStepSelect = document.getElementById('minuteStepSelect');
       const showSecondsCheckbox = document.getElementById('showSecondsCheckbox');
+      const allowEmptyCheckbox = document.getElementById('allowEmptyCheckbox');
       const dateFormatSelect = document.getElementById('dateFormatSelect');
       const languageSelect = document.getElementById('languageSelect');
 
@@ -225,6 +232,7 @@
       showTimeCheckbox.checked = picker.config.showTime;
       minuteStepSelect.value = picker.config.minuteStep.toString();
       showSecondsCheckbox.checked = picker.config.showSeconds;
+      allowEmptyCheckbox.checked = picker.config.allowEmpty || false;
       dateFormatSelect.value = picker.config.dateFormat || '';
       languageSelect.value = picker.config.language || 'en';
 
@@ -244,6 +252,12 @@
       showSecondsCheckbox.addEventListener('change', (e) => {
         picker.setConfig({
           showSeconds: e.target.checked
+        });
+      });
+      
+      allowEmptyCheckbox.addEventListener('change', (e) => {
+        picker.setConfig({
+          allowEmpty: e.target.checked
         });
       });
       

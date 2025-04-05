@@ -48,7 +48,8 @@ class Calendula {
       onChange: options.onChange || null,
       dateFormat: options.dateFormat || null, // Date format (for example, 'YYYY-MM-DD')
       language: options.language || this.detectBrowserLanguage(), // Interface language
-      timezone: options.timezone || null // Timezone for displaying dates (e.g., 'Europe/London', 'America/New_York')
+      timezone: options.timezone || null, // Timezone for displaying dates (e.g., 'Europe/London', 'America/New_York')
+      allowEmpty: options.allowEmpty !== undefined ? options.allowEmpty : false // Allow empty input values
     };
 
     // Internal state
@@ -161,6 +162,9 @@ class Calendula {
 
     // Update input field
     this.updateDateInput();
+    
+    // Initialize clear button visibility
+    this.updateClearButtonVisibility();
 
     // Bind event handlers
     this.bindEvents();
@@ -201,6 +205,20 @@ class Calendula {
       <div class="calendula-month-selector" style="display: none;"></div>
       <div class="calendula-year-selector" style="display: none;"></div>
     `;
+    
+    // Add clear button if allowEmpty is enabled
+    if (this.config.allowEmpty) {
+      const clearButtonContainer = document.createElement('div');
+      clearButtonContainer.className = 'calendula-clear-container';
+      
+      const clearButton = document.createElement('button');
+      clearButton.className = 'calendula-clear-button';
+      clearButton.textContent = this.getTranslation('buttons.clear') || 'Clear';
+      clearButton.tabIndex = '-1';
+      
+      clearButtonContainer.appendChild(clearButton);
+      calendarHeader.appendChild(clearButtonContainer);
+    }
 
     // Grid for calendar days
     const calendarGrid = document.createElement('div');
@@ -263,6 +281,19 @@ class Calendula {
     this.container.insertBefore(inputWrapper, this.dateInput);
     inputWrapper.appendChild(this.dateInput);
     
+    // Add clear button if allowEmpty is enabled
+    if (this.config.allowEmpty) {
+      const clearInputButton = document.createElement('button');
+      clearInputButton.className = 'calendula-clear-input';
+      clearInputButton.innerHTML = '×';
+      clearInputButton.setAttribute('type', 'button');
+      clearInputButton.setAttribute('tabindex', '-1');
+      clearInputButton.setAttribute('aria-label', this.getTranslation('buttons.clear') || 'Clear');
+      
+      // Add to the input wrapper
+      inputWrapper.appendChild(clearInputButton);
+    }
+    
     // Append the picker wrapper to the input wrapper
     inputWrapper.appendChild(pickerWrapper);
     
@@ -294,7 +325,9 @@ class Calendula {
       hoursGrid: this.inputWrapper.querySelector('.calendula-hours-grid'),
       tenMinutesGrid: this.inputWrapper.querySelector('.calendula-ten-minutes-grid'),
       minutesGrid: this.inputWrapper.querySelector('.calendula-minutes-grid'),
-      secondsGrid: this.inputWrapper.querySelector('.calendula-seconds-grid')
+      secondsGrid: this.inputWrapper.querySelector('.calendula-seconds-grid'),
+      clearButton: this.inputWrapper.querySelector('.calendula-clear-button'),
+      clearInputButton: this.inputWrapper.querySelector('.calendula-clear-input')
     };
   }
 
@@ -390,6 +423,15 @@ class Calendula {
       e.stopPropagation(); // Prevent event from reaching document
       this.showYearSelector();
     });
+    
+    // Clear date button (if exists)
+    if (this.elements.clearButton) {
+      this.elements.clearButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from reaching document
+        this.clearDate();
+        this.hideDatePicker();
+      });
+    }
 
     // Show calendar when clicking on input field
     this.elements.dateInput.addEventListener('click', (e) => {
@@ -413,6 +455,9 @@ class Calendula {
 
     // Handle input event for mobile devices and as a fallback
     this.elements.dateInput.addEventListener('input', (e) => {
+      // Update clear button visibility whenever input changes
+      this.updateClearButtonVisibility();
+      
       // On mobile, especially Android, the input event will fire when text is entered
       if (this.isMobileDevice()) {
         // On mobile, handle input differently
@@ -462,6 +507,14 @@ class Calendula {
         this.overwriteDigitsAtCursor(onlyDigits);
       }
     });
+    
+    // Add event handler for clear input button
+    if (this.elements.clearInputButton) {
+      this.elements.clearInputButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from reaching document
+        this.clearDate();
+      });
+    }
     
     // Hide datepicker when clicking outside
     document.addEventListener('click', () => {
@@ -1546,8 +1599,13 @@ class Calendula {
     const input = this.elements.dateInput;
     const currentValue = input.value;
 
-    // If the field is empty, update it with the full date value.
+    // If the field is empty
     if (!currentValue) {
+      // Allow empty value if configured
+      if (this.config.allowEmpty) {
+        return;
+      }
+      // Otherwise update with full date value (default behavior)
       this.updateDateInput();
       return;
     }
@@ -1599,8 +1657,13 @@ class Calendula {
     const input = this.elements.dateInput;
     const currentValue = input.value;
 
-    // If field is empty, update with full date value
+    // If field is empty
     if (!currentValue) {
+      // Allow empty value if configured
+      if (this.config.allowEmpty) {
+        return;
+      }
+      // Otherwise update with full date value (default behavior)
       this.updateDateInput();
       return;
     }
@@ -1663,8 +1726,13 @@ class Calendula {
     // Update our internal state to match
     this.state.cursorPosition = cursorPos;
 
-    // If the field is empty, update with full date value
+    // If the field is empty
     if (!currentValue) {
+      // Allow empty value if configured
+      if (this.config.allowEmpty) {
+        return;
+      }
+      // Otherwise update with full date value (default behavior)
       this.updateDateInput();
       return;
     }
@@ -1762,6 +1830,23 @@ class Calendula {
       } else {
         // Format without seconds (DD.MM.YYYY)
         this.elements.dateInput.value = `${day}.${month}.${year}`;
+      }
+    }
+    
+    // Update visibility of the clear input button
+    this.updateClearButtonVisibility();
+  }
+  
+  /**
+   * Updates the visibility of the clear input button
+   * Shows the button when the input has a value and hides it when empty
+   */
+  updateClearButtonVisibility() {
+    if (this.elements.clearInputButton) {
+      if (this.elements.dateInput.value) {
+        this.elements.clearInputButton.style.display = 'flex';
+      } else {
+        this.elements.clearInputButton.style.display = 'none';
       }
     }
   }
@@ -1915,6 +2000,24 @@ class Calendula {
   }
   
   /**
+   * Clears the date input value
+   * This will only work if allowEmpty is set to true
+   */
+  clearDate() {
+    if (this.config.allowEmpty) {
+      this.elements.dateInput.value = '';
+      
+      // Update clear button visibility
+      this.updateClearButtonVisibility();
+      
+      // Notify of the change
+      if (typeof this.config.onChange === 'function') {
+        this.config.onChange(null);
+      }
+    }
+  }
+
+  /**
    * Formats a date according to the specified format string
    * @param {Date} date - The date to format
    * @param {string} format - Format string (e.g., 'YYYY-MM-DD', 'DD.MM.YYYY')
@@ -1953,6 +2056,7 @@ class Calendula {
    * @returns {Date|null} A Date object or null if parsing fails
    */
   parseDateFromPattern(dateStr, format) {
+    // Return null for empty strings, allowing empty values to be processed properly
     if (!dateStr || !format) {
       return null;
     }
@@ -2096,6 +2200,16 @@ class Calendula {
     // Get the value from the input field
     const inputValue = this.elements.dateInput.value;
     
+    // Handle empty value if allowed
+    if (!inputValue && this.config.allowEmpty) {
+      // Call the callback with null to indicate empty value
+      if (typeof this.config.onChange === 'function') {
+        this.config.onChange(null);
+      }
+      
+      return true;
+    }
+    
     // Let's try to parse the date from the format
     let newDate;
     
@@ -2156,7 +2270,16 @@ class Calendula {
 
       return true;
     } else {
-      // If the date is incorrect, restore the current value
+      // If the date is incorrect but we allow empty values and the input is empty
+      if (this.config.allowEmpty && !inputValue) {
+        // Call the callback with null to indicate empty value
+        if (typeof this.config.onChange === 'function') {
+          this.config.onChange(null);
+        }
+        return true;
+      }
+      
+      // Otherwise restore the current value
       if (updateInput) {
         this.updateDateInput();
       }
@@ -2234,11 +2357,21 @@ class Calendula {
 
   /**
    * Sets the date
-   * @param {Date} date - New date (in local timezone unless specified otherwise)
+   * @param {Date|null} date - New date (in local timezone unless specified otherwise) or null to clear
    * @param {Object} options - Additional options
    * @param {boolean} options.isTimezoneDate - Whether the date is already in the configured timezone
    */
   setDate(date, options = {}) {
+    // Handle null date (clear the input if allowEmpty is true)
+    if (date === null) {
+      if (this.config.allowEmpty) {
+        this.clearDate();
+        return;
+      } else {
+        throw new Error('Calendula: Null date requires allowEmpty option to be true');
+      }
+    }
+    
     if (!(date instanceof Date) || isNaN(date.getTime())) {
       throw new Error('Calendula: Invalid date');
     }
@@ -2315,6 +2448,40 @@ class Calendula {
     if (config.timezone !== undefined) {
       // Update timezone
       this.config.timezone = config.timezone;
+    }
+    
+    if (config.allowEmpty !== undefined && this.config.allowEmpty !== config.allowEmpty) {
+      // Update allowEmpty setting
+      this.config.allowEmpty = config.allowEmpty;
+      
+      // Add or remove clear input button based on new setting
+      const existingClearButton = this.inputWrapper.querySelector('.calendula-clear-input');
+      
+      if (this.config.allowEmpty && !existingClearButton) {
+        // Add clear button if it doesn't exist
+        const clearInputButton = document.createElement('button');
+        clearInputButton.className = 'calendula-clear-input';
+        clearInputButton.innerHTML = '×';
+        clearInputButton.setAttribute('type', 'button');
+        clearInputButton.setAttribute('tabindex', '-1');
+        clearInputButton.setAttribute('aria-label', this.getTranslation('buttons.clear') || 'Clear');
+        
+        // Add to the input wrapper
+        this.inputWrapper.appendChild(clearInputButton);
+        
+        // Add event handler
+        clearInputButton.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent event from reaching document
+          this.clearDate();
+        });
+        
+        // Update DOM elements reference
+        this.elements.clearInputButton = clearInputButton;
+      } else if (!this.config.allowEmpty && existingClearButton) {
+        // Remove clear button if it exists
+        existingClearButton.remove();
+        this.elements.clearInputButton = null;
+      }
     }
 
     // Apply new configuration

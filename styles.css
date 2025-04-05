@@ -94,6 +94,10 @@
   margin: 0 auto;
 }
 
+.calendula-date-input-wrapper {
+  position: relative;
+}
+
 .calendula-date-input {
   background-color: var(--calendula-input-bg);
   color: var(--calendula-input-text);
@@ -102,6 +106,40 @@
 
 .calendula-date-input::placeholder {
   color: var(--calendula-input-placeholder);
+}
+
+.calendula-clear-input {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  display: none; /* Hidden by default, shown when input has value */
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+  border: none;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0;
+  line-height: 1;
+  z-index: 2;
+  opacity: 0.7;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.calendula-clear-input:hover {
+  opacity: 1;
+  background-color: #e0e0e0;
+}
+
+/* Ensure the clear button appears above any browser default input decorations */
+.calendula-date-input {
+  padding-right: 30px; /* Make space for the clear button */
 }
 
 @media (max-width: 540px) {
@@ -121,6 +159,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.calendula-clear-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.calendula-clear-button {
+  background-color: var(--calendula-btn-hover);
+  border: 1px solid var(--calendula-border-light);
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--calendula-text-primary);
+  transition: background-color 0.2s;
+}
+
+.calendula-clear-button:hover {
+  background-color: var(--calendula-border-light);
 }
 
 .calendula-month-nav button {
