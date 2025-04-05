@@ -119,6 +119,12 @@
       <li>Clear the value programmatically using <span class="code">calendar.clearDate()</span>.</li>
       <li>Set a null date using <span class="code">calendar.setDate(null)</span>.</li>
       <li>The onChange callback will receive <span class="code">null</span> when the date is empty.</li>
+      <li>To set a new date after clearing:</li>
+      <ul>
+        <li><strong>Click on the field</strong> to open the calendar, which will show today's date as a starting point. Select any date to set the value.</li>
+        <li><strong>Type a digit</strong> in the empty field to auto-fill with today's date, replacing the first digit with what you typed.</li>
+      </ul>
+      <li>The date picker always keeps an internal reference date (defaulting to today), so there's always a sensible starting point when interacting with an empty field.</li>
     </ol>
   </div>
 

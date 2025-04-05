@@ -206,19 +206,19 @@ class Calendula {
       <div class="calendula-year-selector" style="display: none;"></div>
     `;
     
-    // Add clear button if allowEmpty is enabled
-    if (this.config.allowEmpty) {
-      const clearButtonContainer = document.createElement('div');
-      clearButtonContainer.className = 'calendula-clear-container';
-      
-      const clearButton = document.createElement('button');
-      clearButton.className = 'calendula-clear-button';
-      clearButton.textContent = this.getTranslation('buttons.clear') || 'Clear';
-      clearButton.tabIndex = '-1';
-      
-      clearButtonContainer.appendChild(clearButton);
-      calendarHeader.appendChild(clearButtonContainer);
-    }
+    // // Add clear button if allowEmpty is enabled
+    // if (this.config.allowEmpty) {
+    //   const clearButtonContainer = document.createElement('div');
+    //   clearButtonContainer.className = 'calendula-clear-container';
+    //
+    //   const clearButton = document.createElement('button');
+    //   clearButton.className = 'calendula-clear-button';
+    //   clearButton.textContent = this.getTranslation('buttons.clear') || 'Clear';
+    //   clearButton.tabIndex = '-1';
+    //
+    //   clearButtonContainer.appendChild(clearButton);
+    //   calendarHeader.appendChild(clearButtonContainer);
+    // }
 
     // Grid for calendar days
     const calendarGrid = document.createElement('div');
@@ -754,9 +754,23 @@ class Calendula {
    * Key press handler for the input field
    */
   handleKeyDown(e) {
+    const input = this.elements.dateInput;
+
     // Process only printable characters and Backspace/Delete
     const isPrintableChar = e.key.length === 1;
     const isDeleteOrBackspace = e.key === 'Delete' || e.key === 'Backspace';
+    
+    // Special handling for empty field when a digit is typed
+    if (this._emptyValue && this.config.allowEmpty && /^\d$/.test(e.key)) {
+      e.preventDefault(); // Prevent default behavior
+
+      this.setDate(new Date());
+
+      // Move cursor to the start
+      input.selectionStart = 0;
+      input.selectionEnd = 0;
+      this.state.cursorPosition = 0;
+    }
     
     // List of navigation keys we want to allow default behavior for
     const isNavigationKey = ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
@@ -779,7 +793,6 @@ class Calendula {
 
     e.preventDefault(); // Cancel default behavior
 
-    const input = this.elements.dateInput;
     // Always get the current cursor position directly from the input element
     const cursorPos = input.selectionStart;
     // Update our internal state to match
@@ -996,6 +1009,9 @@ class Calendula {
    * @param {number} month - Month index (0-11)
    */
   selectMonth(month) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
     this.state.currentDate.setMonth(month);
     this.updateMonthTitle();
     this.renderCalendarDays();
@@ -1026,6 +1042,9 @@ class Calendula {
    * @param {number} year - Year value
    */
   selectYear(year) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
     this.state.currentDate.setFullYear(year);
     this.updateMonthTitle();
     this.renderCalendarDays();
@@ -1084,6 +1103,35 @@ class Calendula {
    */
   showDatePicker() {
     if (this.isDatePickerVisible()) return;
+    
+    // Special handling when the field is empty - show the calendar with current date
+    // but don't update the input field yet
+    if (this._emptyValue && this.config.allowEmpty) {
+      // We'll keep the input empty until the user selects a date, but ensure
+      // the calendar shows a sensible date as its starting point
+      
+      // Update the internal state to the current date/time if needed
+      const now = new Date();
+      
+      // Only update the state if it's not already set to a valid date
+      if (!this.state.selectedDate || isNaN(this.state.selectedDate.getTime())) {
+        this.state.currentDate = new Date(now);
+        this.state.selectedDate = new Date(now);
+        this.state.selectedHour = now.getHours();
+        this.state.selectedTenMinute = Math.floor(now.getMinutes() / 10) * 10;
+        this.state.selectedMinute = now.getMinutes() % 10;
+        this.state.selectedSecond = now.getSeconds();
+      }
+      
+      // Render with the current state, but keep input empty
+      this.renderCalendarDays();
+      this.renderHours();
+      this.renderTenMinutes();
+      this.renderMinutes();
+      if (this.config.showSeconds) {
+        this.renderSeconds();
+      }
+    }
     
     // Make sure the date picker is visible
     this.datePickerElement.style.display = 'flex';
@@ -1267,6 +1315,13 @@ class Calendula {
    * @param {number} day - Day of the month
    */
   selectDate(day) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
+    // When selecting a date from the calendar UI, we should always display the value
+    // regardless of whether the field was previously empty
+    this._emptyValue = false;
+
     // Update selected date
     this.state.selectedDate = new Date(
       this.state.currentDate.getFullYear(),
@@ -1335,6 +1390,12 @@ class Calendula {
    * @param {number} hour - Hour (0-23)
    */
   selectHour(hour) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
+    // When selecting time from the UI, always display value
+    this._emptyValue = false;
+    
     this.state.selectedHour = hour;
 
     // Update selected time
@@ -1395,6 +1456,12 @@ class Calendula {
    * @param {number} minute - Tens of minutes (0, 10, 20, 30, 40, 50)
    */
   selectTenMinute(minute) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
+    // When selecting time from the UI, always display value
+    this._emptyValue = false;
+    
     this.state.selectedTenMinute = minute;
 
     // Update the selected time
@@ -1480,6 +1547,12 @@ class Calendula {
    * @param {number} minute - Minutes (0-9 for step=1, 0-59 for other steps)
    */
   selectMinute(minute) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
+    // When selecting time from the UI, always display value
+    this._emptyValue = false;
+    
     // Check if we're on mobile
     const isMobile = this.isMobileDevice();
 
@@ -1561,6 +1634,11 @@ class Calendula {
    * @param {number} second - Seconds (0-59)
    */
   selectSecond(second) {
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.setDate(new Date());
+    }
+    // When selecting time from the UI, always display value
+    this._emptyValue = false;
     this.state.selectedSecond = second;
 
     // Update selected time
@@ -1788,6 +1866,16 @@ class Calendula {
    * Updates the input field value based on the selected date
    */
   updateDateInput() {
+    // If in empty value mode and allowEmpty is enabled, keep input empty
+    if (this._emptyValue && this.config.allowEmpty) {
+      this.elements.dateInput.value = '';
+      this.updateClearButtonVisibility();
+      return;
+    }
+    
+    // Always ensure empty flag is cleared when showing a date
+    this._emptyValue = false;
+    
     try {
       // Get appropriate format string
       let formatString = this.getFormatString();
@@ -2005,10 +2093,25 @@ class Calendula {
    */
   clearDate() {
     if (this.config.allowEmpty) {
+      // Clear the input field
       this.elements.dateInput.value = '';
       
       // Update clear button visibility
       this.updateClearButtonVisibility();
+      
+      // Store today's date in the state for future reference
+      // This ensures if the user opens the calendar after clearing,
+      // it will show a sensible starting date
+      const now = new Date();
+      this.state.currentDate = new Date(now);
+      this.state.selectedDate = new Date(now);
+      this.state.selectedHour = now.getHours();
+      this.state.selectedTenMinute = Math.floor(now.getMinutes() / 10) * 10;
+      this.state.selectedMinute = now.getMinutes() % 10;
+      this.state.selectedSecond = now.getSeconds();
+      
+      // Set empty value flag
+      this._emptyValue = true;
       
       // Notify of the change
       if (typeof this.config.onChange === 'function') {
@@ -2400,6 +2503,8 @@ class Calendula {
     if (this.config.showTime && this.config.showSeconds) {
       this.renderSeconds();
     }
+
+    this._emptyValue = false;
 
     this.updateDateInput();
 
